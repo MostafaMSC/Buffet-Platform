@@ -52,7 +52,7 @@ project gives the same separation without solution-file overhead.
 ### 1. Database
 
 ```bash
-docker compose up -d          # Postgres on localhost:5432 (user/db: buffet / buffet_discovery)
+docker compose up -d          # Postgres on localhost:5433 (user/db: buffet / buffet_discovery)
 ```
 
 (If you don't want Docker, point `ConnectionStrings:Default` in

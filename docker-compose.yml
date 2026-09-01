@@ -8,7 +8,10 @@ services:
       POSTGRES_PASSWORD: buffet_dev_pw
       POSTGRES_DB: buffet_discovery
     ports:
-      - "5432:5432"
+      # Host port 5433 (not 5432) so this doesn't collide with a native/local
+      # Postgres install already running on the default port. The container
+      # still listens on 5432 internally.
+      - "5433:5432"
     volumes:
       - buffet_pgdata:/var/lib/postgresql/data
 
