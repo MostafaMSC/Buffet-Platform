@@ -1,0 +1,20 @@
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/**/wwwroot/uploads/*
+!backend/**/wwwroot/uploads/.gitkeep
+*.user
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log

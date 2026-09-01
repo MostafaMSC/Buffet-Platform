@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: buffet-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: buffet
+      POSTGRES_PASSWORD: buffet_dev_pw
+      POSTGRES_DB: buffet_discovery
+    ports:
+      - "5432:5432"
+    volumes:
+      - buffet_pgdata:/var/lib/postgresql/data
+
+volumes:
+  buffet_pgdata:
