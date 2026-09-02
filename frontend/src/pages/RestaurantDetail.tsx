@@ -115,14 +115,28 @@ function OfferingVideo({ url, label }: { url: string; label: string }) {
   }
 
   return (
-    <div className="video-embed">
-      <iframe
-        src={embedUrl}
-        title={label}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-        loading="lazy"
-      />
+    <div>
+      <div className="video-embed">
+        <iframe
+          src={embedUrl}
+          title={label}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          loading="lazy"
+        />
+      </div>
+      {/* Some videos (private, or posted from a personal profile rather than a Page)
+          refuse to embed and show Facebook's own "Video Unavailable" message inside the
+          iframe — we can't detect that from the parent page (cross-origin), so always
+          offer a link that's guaranteed to work as a fallback. */}
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', display: 'inline-block', marginTop: '0.35rem' }}
+      >
+        {label} ↗
+      </a>
     </div>
   )
 }
