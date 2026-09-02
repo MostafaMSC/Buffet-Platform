@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { api } from '../../api/client'
 import { PhotoUploader } from '../../components/PhotoUploader'
+import { VideoUploader } from '../../components/VideoUploader'
 import type { DashboardOffering, MealType, OfferingInput, RecurrenceType, WeekdayName } from '../../types'
+import { isDirectVideoFile } from '../../utils/video'
 
 const MEAL_TYPES: MealType[] = ['Breakfast', 'Lunch', 'Iftar', 'Sohor']
 const RECURRENCE_TYPES: RecurrenceType[] = ['Daily', 'SpecificWeekdays', 'RamadanMode', 'OneOff']
@@ -243,11 +245,18 @@ export function OfferingFormPage() {
         </div>
 
         <div className="form-field">
-          <label>{t('offeringForm.videoUrl')}</label>
+          <label>{t('offeringForm.video')}</label>
+          <VideoUploader
+            url={isDirectVideoFile(form.videoUrl) ? form.videoUrl : null}
+            onChange={(url) => update('videoUrl', url ?? '')}
+          />
+          <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)', display: 'block', margin: '0.4rem 0' }}>
+            {t('offeringForm.videoUploadHint')}
+          </span>
           <input
             type="url"
             placeholder="https://facebook.com/... or youtube.com/..."
-            value={form.videoUrl ?? ''}
+            value={isDirectVideoFile(form.videoUrl) ? '' : form.videoUrl ?? ''}
             onChange={(e) => update('videoUrl', e.target.value)}
           />
           <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>

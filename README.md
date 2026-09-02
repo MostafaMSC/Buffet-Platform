@@ -144,8 +144,12 @@ seeded admin account to approve it before it appears publicly.
   filter and restaurant onboarding form both read from `/api/areas`, so no frontend changes are needed.
 - **Auth**: phone number + password with JWT, intentionally minimal (no OTP/SMS, no password reset)
   to match "simple auth is fine" in the brief.
-- **Photo uploads**: stored on local disk under `wwwroot/uploads` and served as static files. Fine
-  for an MVP / single-instance deployment; swap for blob storage (S3/Azure Blob) before scaling to
-  multiple app instances.
+- **Photo/video uploads**: stored on local disk under `wwwroot/uploads` and served as static files
+  (photos: JPG/PNG/WEBP, max 8MB; offering video: MP4/WEBM/MOV, max 50MB). Fine for an MVP /
+  single-instance deployment; swap for blob storage (S3/Azure Blob) before scaling to multiple app
+  instances. An offering's video can also be an external link (Facebook/YouTube/Instagram) instead
+  of an upload — the frontend embeds recognized platform links inline, falling back to an
+  external "watch" link when a link can't be embedded (e.g. Facebook only embeds videos posted
+  publicly from a Page, not a personal profile) or isn't from a recognized platform.
 - **Out of scope** (per the brief): booking/reservations, payments, push notifications,
   reviews/ratings, native apps, WhatsApp/Telegram bots.

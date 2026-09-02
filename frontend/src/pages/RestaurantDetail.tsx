@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import type { RestaurantDetail as RestaurantDetailType } from '../types'
-import { getVideoEmbedUrl } from '../utils/video'
+import { getVideoEmbedUrl, isDirectVideoFile } from '../utils/video'
 
 export function RestaurantDetail() {
   const { id } = useParams()
@@ -98,6 +98,15 @@ export function RestaurantDetail() {
 }
 
 function OfferingVideo({ url, label }: { url: string; label: string }) {
+  if (isDirectVideoFile(url)) {
+    return (
+      <div className="video-embed">
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+        <video src={url} controls playsInline preload="metadata" />
+      </div>
+    )
+  }
+
   const embedUrl = getVideoEmbedUrl(url)
 
   if (!embedUrl) {

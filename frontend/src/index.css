@@ -404,12 +404,27 @@ main {
   margin-top: 0.6rem;
 }
 
-.video-embed iframe {
+.video-embed iframe,
+.video-embed video {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   border: none;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-upload-preview {
+  max-width: 240px;
+}
+
+.video-upload-preview video {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: #000;
+  display: block;
+  margin-bottom: 0.5rem;
 }
 
 .offering-photos img {

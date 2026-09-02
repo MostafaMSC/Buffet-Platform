@@ -39,3 +39,17 @@ export function getVideoEmbedUrl(url: string): string | null {
 
   return null
 }
+
+const DIRECT_VIDEO_EXTENSIONS = ['.mp4', '.webm', '.mov']
+
+/**
+ * True for a URL that points at an actual video file (an upload we're hosting
+ * ourselves, or any other direct .mp4/.webm/.mov link) rather than a page on an
+ * external platform. These play natively via <video>, which is far more reliable
+ * than depending on a third party's embed/privacy rules.
+ */
+export function isDirectVideoFile(url: string | null | undefined): url is string {
+  if (!url) return false
+  const path = url.split('?')[0].toLowerCase()
+  return DIRECT_VIDEO_EXTENSIONS.some((ext) => path.endsWith(ext))
+}

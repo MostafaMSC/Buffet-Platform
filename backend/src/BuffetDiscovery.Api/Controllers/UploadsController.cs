@@ -11,10 +11,8 @@ namespace BuffetDiscovery.Api.Controllers;
 [Authorize(Roles = "RestaurantOwner,Admin")]
 public class UploadsController(ISender mediator) : ControllerBase
 {
-    private const long MaxFileSizeBytes = 8 * 1024 * 1024;
-
     [HttpPost]
-    [RequestSizeLimit(MaxFileSizeBytes)]
+    [RequestSizeLimit(UploadFileCommandValidator.MaxVideoSizeBytes)]
     public async Task<ActionResult<UploadResultDto>> Upload(IFormFile file, CancellationToken ct)
     {
         await using var stream = file.OpenReadStream();
