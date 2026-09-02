@@ -20,7 +20,8 @@ public record CreateOfferingCommand(
     DateOnly? RamadanStartDate,
     DateOnly? RamadanEndDate,
     DateOnly? OneOffDate,
-    List<string>? PhotoUrls
+    List<string>? PhotoUrls,
+    string? VideoUrl
 ) : IRequest<int>;
 
 public class CreateOfferingCommandValidator : AbstractValidator<CreateOfferingCommand>
@@ -30,6 +31,9 @@ public class CreateOfferingCommandValidator : AbstractValidator<CreateOfferingCo
         RuleFor(x => x.Price).GreaterThanOrEqualTo(0);
         RuleFor(x => x.OpensAt).Must(t => TimeOnly.TryParse(t, out _)).WithMessage("Invalid time format, expected HH:mm.");
         RuleFor(x => x.ClosesAt).Must(t => TimeOnly.TryParse(t, out _)).WithMessage("Invalid time format, expected HH:mm.");
+        RuleFor(x => x.VideoUrl)
+            .Must(url => string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+            .WithMessage("Video link must be a valid URL.");
 
         When(x => x.Recurrence == RecurrenceType.SpecificWeekdays, () =>
         {
@@ -74,7 +78,8 @@ public class CreateOfferingCommandHandler(
             Weekdays = WeekdayMapper.ToFlags(request.Weekdays),
             RamadanStartDate = request.RamadanStartDate,
             RamadanEndDate = request.RamadanEndDate,
-            OneOffDate = request.OneOffDate
+            OneOffDate = request.OneOffDate,
+            VideoUrl = request.VideoUrl
         };
 
         if (request.PhotoUrls is not null)

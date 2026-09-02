@@ -76,6 +76,17 @@ export function RestaurantDetail() {
               </span>
             </div>
             {desc && <p>{desc}</p>}
+            {o.videoUrl && (
+              <a
+                className="action-btn"
+                href={o.videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ marginTop: '0.5rem', display: 'inline-flex' }}
+              >
+                ▶ {t('detail.watchVideo')}
+              </a>
+            )}
             {o.photoUrls.length > 0 && (
               <div className="offering-photos">
                 {o.photoUrls.map((url) => (

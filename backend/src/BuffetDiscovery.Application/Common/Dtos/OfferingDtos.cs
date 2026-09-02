@@ -42,22 +42,8 @@ public record RestaurantOfferingDto(
     string? Description,
     string? DescriptionAr,
     List<string> PhotoUrls,
+    string? VideoUrl,
     bool IsActiveToday
-);
-
-public record OfferingInputDto(
-    MealType MealType,
-    decimal Price,
-    string OpensAt,
-    string ClosesAt,
-    string? Description,
-    string? DescriptionAr,
-    RecurrenceType Recurrence,
-    List<string>? Weekdays,
-    DateOnly? RamadanStartDate,
-    DateOnly? RamadanEndDate,
-    DateOnly? OneOffDate,
-    List<string>? PhotoUrls
 );
 
 public record DashboardOfferingDto(
@@ -74,6 +60,7 @@ public record DashboardOfferingDto(
     DateOnly? RamadanEndDate,
     DateOnly? OneOffDate,
     List<string> PhotoUrls,
+    string? VideoUrl,
     List<DayStatusDto> Days
 );
 

@@ -64,6 +64,7 @@ public class GetDashboardOfferingsQueryHandler(
             o.RamadanEndDate,
             o.OneOffDate,
             o.Photos.OrderBy(p => p.SortOrder).Select(p => p.Url).ToList(),
+            o.VideoUrl,
             statuses.Where(s => s.OfferingId == o.Id)
                 .OrderBy(s => s.Date)
                 .Select(s => new DayStatusDto(s.Date, s.IsActive))

@@ -30,6 +30,7 @@ const emptyForm: OfferingInput = {
   ramadanEndDate: null,
   oneOffDate: null,
   photoUrls: [],
+  videoUrl: '',
 }
 
 export function OfferingFormPage() {
@@ -61,6 +62,7 @@ export function OfferingFormPage() {
           ramadanEndDate: existing.ramadanEndDate,
           oneOffDate: existing.oneOffDate,
           photoUrls: existing.photoUrls,
+          videoUrl: existing.videoUrl ?? '',
         })
       }
       setLoading(false)
@@ -83,10 +85,11 @@ export function OfferingFormPage() {
     setSaving(true)
     setError(false)
     try {
+      const payload = { ...form, videoUrl: form.videoUrl?.trim() || null }
       if (isEdit) {
-        await api.put(`/dashboard/offerings/${id}`, form)
+        await api.put(`/dashboard/offerings/${id}`, payload)
       } else {
-        await api.post('/dashboard/offerings', form)
+        await api.post('/dashboard/offerings', payload)
       }
       navigate('/dashboard')
     } catch {
@@ -237,6 +240,19 @@ export function OfferingFormPage() {
         <div className="form-field">
           <label>{t('offeringForm.photos')}</label>
           <PhotoUploader urls={form.photoUrls ?? []} onChange={(urls) => update('photoUrls', urls)} />
+        </div>
+
+        <div className="form-field">
+          <label>{t('offeringForm.videoUrl')}</label>
+          <input
+            type="url"
+            placeholder="https://facebook.com/... or youtube.com/..."
+            value={form.videoUrl ?? ''}
+            onChange={(e) => update('videoUrl', e.target.value)}
+          />
+          <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+            {t('offeringForm.videoUrlHint')}
+          </span>
         </div>
 
         <button className="btn" type="submit" disabled={saving}>

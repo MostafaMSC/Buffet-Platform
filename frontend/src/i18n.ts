@@ -59,6 +59,7 @@ const resources = {
         activeToday: 'Available today',
         notActiveToday: 'Not available today',
         back: 'Back to results',
+        watchVideo: 'Watch video',
       },
       auth: {
         phone: 'Phone number',
@@ -111,6 +112,8 @@ const resources = {
         photos: 'Photos',
         addPhoto: 'Upload photo',
         uploading: 'Uploading…',
+        videoUrl: 'Video link (optional)',
+        videoUrlHint: 'Paste a link to a video of the buffet from Facebook, Instagram or YouTube.',
       },
       profileForm: {
         name: 'Restaurant name (English)',
@@ -203,6 +206,7 @@ const resources = {
         activeToday: 'متاح اليوم',
         notActiveToday: 'غير متاح اليوم',
         back: 'العودة للنتائج',
+        watchVideo: 'مشاهدة الفيديو',
       },
       auth: {
         phone: 'رقم الهاتف',
@@ -255,6 +259,8 @@ const resources = {
         photos: 'الصور',
         addPhoto: 'رفع صورة',
         uploading: 'جاري الرفع…',
+        videoUrl: 'رابط فيديو (اختياري)',
+        videoUrlHint: 'الصق رابط فيديو للبوفيه من فيسبوك أو إنستغرام أو يوتيوب.',
       },
       profileForm: {
         name: 'اسم المطعم (إنكليزي)',

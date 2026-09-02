@@ -20,7 +20,8 @@ public record UpdateOfferingCommand(
     DateOnly? RamadanStartDate,
     DateOnly? RamadanEndDate,
     DateOnly? OneOffDate,
-    List<string>? PhotoUrls
+    List<string>? PhotoUrls,
+    string? VideoUrl
 ) : IRequest;
 
 public class UpdateOfferingCommandValidator : AbstractValidator<UpdateOfferingCommand>
@@ -30,6 +31,9 @@ public class UpdateOfferingCommandValidator : AbstractValidator<UpdateOfferingCo
         RuleFor(x => x.Price).GreaterThanOrEqualTo(0);
         RuleFor(x => x.OpensAt).Must(t => TimeOnly.TryParse(t, out _)).WithMessage("Invalid time format, expected HH:mm.");
         RuleFor(x => x.ClosesAt).Must(t => TimeOnly.TryParse(t, out _)).WithMessage("Invalid time format, expected HH:mm.");
+        RuleFor(x => x.VideoUrl)
+            .Must(url => string.IsNullOrWhiteSpace(url) || Uri.TryCreate(url, UriKind.Absolute, out _))
+            .WithMessage("Video link must be a valid URL.");
 
         When(x => x.Recurrence == RecurrenceType.SpecificWeekdays, () =>
         {
@@ -73,6 +77,7 @@ public class UpdateOfferingCommandHandler(
         offering.RamadanStartDate = request.RamadanStartDate;
         offering.RamadanEndDate = request.RamadanEndDate;
         offering.OneOffDate = request.OneOffDate;
+        offering.VideoUrl = request.VideoUrl;
 
         if (request.PhotoUrls is not null)
         {

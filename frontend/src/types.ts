@@ -40,6 +40,7 @@ export interface RestaurantOffering {
   description: string | null
   descriptionAr: string | null
   photoUrls: string[]
+  videoUrl: string | null
   isActiveToday: boolean
 }
 
@@ -101,6 +102,7 @@ export interface DashboardOffering {
   ramadanEndDate: string | null
   oneOffDate: string | null
   photoUrls: string[]
+  videoUrl: string | null
   days: DayStatus[]
 }
 
@@ -117,6 +119,7 @@ export interface OfferingInput {
   ramadanEndDate?: string | null
   oneOffDate?: string | null
   photoUrls?: string[] | null
+  videoUrl?: string | null
 }
 
 export interface RestaurantAdminListItem {

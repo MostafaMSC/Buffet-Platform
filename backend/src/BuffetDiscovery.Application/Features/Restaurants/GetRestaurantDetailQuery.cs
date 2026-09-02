@@ -35,6 +35,7 @@ public class GetRestaurantDetailQueryHandler(
                 o.Description,
                 o.DescriptionAr,
                 o.Photos.OrderBy(p => p.SortOrder).Select(p => p.Url).ToList(),
+                o.VideoUrl,
                 isActiveToday
             );
         }).ToList();

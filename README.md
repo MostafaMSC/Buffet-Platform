@@ -70,8 +70,11 @@ instead of being hand-rolled per controller action.
 
 - **Area** — fixed lookup list of Baghdad neighborhoods (bilingual names), used for filtering.
 - **Restaurant** — profile, area, contact info, status (`Pending`/`Approved`/`Suspended`/`Rejected`).
-- **BuffetOffering** — one buffet a restaurant runs (meal type, price, hours, photos, recurrence rule:
-  `Daily`, `SpecificWeekdays`, `RamadanMode` with a date range, or `OneOff`).
+- **BuffetOffering** — one buffet a restaurant runs (meal type, price, hours, photos, an optional
+  video link, recurrence rule: `Daily`, `SpecificWeekdays`, `RamadanMode` with a date range, or
+  `OneOff`). The video is a link (Facebook/Instagram/YouTube), not a hosted file — restaurants
+  already post this content on their own social pages, so linking avoids us hosting/streaming
+  video ourselves.
 - **AvailabilityStatus** — the concrete per-date on/off record customers actually see. Rows are
   materialized lazily from the offering's recurrence rule (`Domain/Services/RecurrenceEvaluator`,
   called from the `BrowseOfferingsQuery`/`GetDashboardOfferingsQuery` handlers) the first time a
