@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import type { RestaurantDetail as RestaurantDetailType } from '../types'
+import { getVideoEmbedUrl } from '../utils/video'
 
 export function RestaurantDetail() {
   const { id } = useParams()
@@ -81,17 +82,7 @@ export function RestaurantDetail() {
               </span>
             </div>
             {desc && <p>{desc}</p>}
-            {o.videoUrl && (
-              <a
-                className="action-btn"
-                href={o.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                style={{ marginTop: '0.5rem', display: 'inline-flex' }}
-              >
-                ▶ {t('detail.watchVideo')}
-              </a>
-            )}
+            {o.videoUrl && <OfferingVideo url={o.videoUrl} label={t('detail.watchVideo')} />}
             {o.photoUrls.length > 0 && (
               <div className="offering-photos">
                 {o.photoUrls.map((url) => (
@@ -102,6 +93,36 @@ export function RestaurantDetail() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function OfferingVideo({ url, label }: { url: string; label: string }) {
+  const embedUrl = getVideoEmbedUrl(url)
+
+  if (!embedUrl) {
+    return (
+      <a
+        className="action-btn"
+        href={url}
+        target="_blank"
+        rel="noreferrer"
+        style={{ marginTop: '0.5rem', display: 'inline-flex' }}
+      >
+        ▶ {label}
+      </a>
+    )
+  }
+
+  return (
+    <div className="video-embed">
+      <iframe
+        src={embedUrl}
+        title={label}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        loading="lazy"
+      />
     </div>
   )
 }

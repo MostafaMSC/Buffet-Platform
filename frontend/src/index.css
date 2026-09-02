@@ -393,6 +393,25 @@ main {
   margin-top: 0.75rem;
 }
 
+.video-embed {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+  margin-top: 0.6rem;
+}
+
+.video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 .offering-photos img {
   border-radius: var(--radius-sm);
   aspect-ratio: 1 / 1;
