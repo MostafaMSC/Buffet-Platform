@@ -1,6 +1,10 @@
 using System.Text;
-using BuffetDiscovery.Api.Data;
+using BuffetDiscovery.Api.Middleware;
 using BuffetDiscovery.Api.Services;
+using BuffetDiscovery.Application;
+using BuffetDiscovery.Application.Common.Interfaces;
+using BuffetDiscovery.Infrastructure;
+using BuffetDiscovery.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -16,11 +20,13 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+builder.Services.AddApplication();
 
-builder.Services.AddScoped<AvailabilityService>();
-builder.Services.AddScoped<JwtTokenService>();
+var uploadsRootPath = Path.Combine(builder.Environment.WebRootPath, "uploads");
+builder.Services.AddInfrastructure(builder.Configuration, uploadsRootPath);
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var jwtSection = builder.Configuration.GetSection("Jwt");
 builder.Services.AddAuthentication(options =>
@@ -69,6 +75,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseStaticFiles();
 app.UseCors();
