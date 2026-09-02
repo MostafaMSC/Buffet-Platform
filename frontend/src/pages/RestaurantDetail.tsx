@@ -42,6 +42,11 @@ export function RestaurantDetail() {
       <div className="detail-header">
         <h1>{name}</h1>
         <div className="area">{areaName}</div>
+        {restaurant.address && (
+          <div className="area" style={{ marginTop: '-0.5rem' }}>
+            {restaurant.address}
+          </div>
+        )}
       </div>
 
       {description && <p>{description}</p>}
