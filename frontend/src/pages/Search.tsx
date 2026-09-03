@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { searchServices, type SearchParams } from '../api/endpoints'
+import { getLocations, searchServices, type SearchParams } from '../api/endpoints'
 import { CategoryNav, type CategoryValue } from '../components/CategoryNav'
 import { FilterPanel, activeFilterCount } from '../components/FilterPanel'
-import { SearchBar, type SearchBarValue } from '../components/SearchBar'
+import { SearchBar, SearchSummary, type SearchBarValue } from '../components/SearchBar'
 import { ServiceCard } from '../components/ServiceCard'
 import { CardSkeleton, EmptyState, Icon, Sheet } from '../components/ui'
-import type { SearchResults, SearchSort } from '../types'
+import type { CountryOption, SearchResults, SearchSort } from '../types'
 import { addDays, formatDate, todayInBaghdad } from '../utils/format'
 
 const SORTS: SearchSort[] = ['Recommended', 'PriceLowToHigh', 'PriceHighToLow', 'Rating', 'Popular', 'Distance']
@@ -26,6 +26,9 @@ export function Search() {
   const [showSearchSheet, setShowSearchSheet] = useState(false)
   const [highlighted, setHighlighted] = useState<number | null>(null)
   const requestId = useRef(0)
+  const [countries, setCountries] = useState<CountryOption[]>([])
+
+  useEffect(() => { getLocations().then(setCountries).catch(() => setCountries([])) }, [])
 
   const get = useCallback((key: string) => params.get(key) ?? undefined, [params])
   const getAll = useCallback((key: string) => params.getAll(key), [params])
@@ -86,6 +89,7 @@ export function Search() {
 
   const searchValue: SearchBarValue = {
     city: query.city ?? '',
+    areaId: query.areaId,
     date: query.date ?? '',
     time: query.time ?? '',
     guests: query.guests ?? 2,
@@ -94,6 +98,12 @@ export function Search() {
   const category: CategoryValue = (query.type as CategoryValue) ?? 'All'
   const filterCount = activeFilterCount(params)
   const cityLabel = query.city ? t(`city.${query.city}`, { defaultValue: query.city }) : null
+  const areaLabel = query.areaId
+    ? countries.flatMap((c) => c.cities).flatMap((c) => c.areas).find((a) => a.id === query.areaId)
+    : undefined
+  const locationLabel = areaLabel
+    ? `${i18n.language === 'ar' ? areaLabel.nameAr : areaLabel.nameEn}, ${cityLabel}`
+    : (cityLabel ?? undefined)
 
   return (
     <>
@@ -105,12 +115,20 @@ export function Search() {
                 value={searchValue}
                 onChange={(next) => patch({
                   city: next.city || undefined,
+                  areaId: next.areaId ? String(next.areaId) : undefined,
                   date: next.date || undefined,
                   time: next.time || undefined,
                   guests: String(next.guests),
                 })}
                 onSubmit={() => { /* URL already reflects each change */ }}
               />
+            </div>
+
+            {/* On a phone the full search bar has too many controls to sit permanently in a
+                sticky header, so it collapses to a single summary row that opens the same
+                bar in a sheet. */}
+            <div className="mobile-search-trigger">
+              <SearchSummary value={searchValue} locationLabel={locationLabel} onClick={() => setShowSearchSheet(true)} />
             </div>
 
             <CategoryNav value={category} onChange={(next) => patch({ type: next === 'All' ? undefined : next })} />
@@ -258,6 +276,7 @@ export function Search() {
             value={searchValue}
             onChange={(next) => patch({
               city: next.city || undefined,
+              areaId: next.areaId ? String(next.areaId) : undefined,
               date: next.date || undefined,
               time: next.time || undefined,
               guests: String(next.guests),

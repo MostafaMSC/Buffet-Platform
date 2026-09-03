@@ -644,6 +644,16 @@ html[dir='rtl'] .searchbar-field + .searchbar-field { box-shadow: inset -1px 0 0
 .searchbar-field select:focus,
 .searchbar-field input:focus { outline: none; box-shadow: none; }
 
+/* The "Where" field: a city select, plus an area select that appears once a city with
+   neighborhoods is chosen. Both share the row rather than claiming a grid column each. */
+.where-controls { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.where-controls select { width: auto; min-width: 0; flex: 1 1 0; }
+.where-controls select:nth-child(2) {
+  padding-inline-start: 6px;
+  box-shadow: inset 1px 0 0 var(--c-line);
+}
+html[dir='rtl'] .where-controls select:nth-child(2) { box-shadow: inset -1px 0 0 var(--c-line); }
+
 .searchbar .btn { align-self: center; margin-inline-start: var(--sp-2); }
 
 @media (max-width: 900px) {
@@ -656,6 +666,20 @@ html[dir='rtl'] .searchbar-field + .searchbar-field { box-shadow: inset -1px 0 0
   .searchbar-field { border-radius: var(--r-sm); background: var(--c-surface-alt); }
   .searchbar-field + .searchbar-field { box-shadow: none; }
   .searchbar .btn { grid-column: 1 / -1; width: 100%; margin: 0; }
+
+  /* "Where" is always the first field. On a phone-width row a city select and an area
+     select can't share half a column without truncating both, so it takes the full row
+     and stacks the two controls instead of sitting them side by side. */
+  .searchbar-field:first-child { grid-column: 1 / -1; }
+  .where-controls { flex-wrap: wrap; }
+  .where-controls select { flex-basis: 100%; }
+  .where-controls select:nth-child(2) {
+    box-shadow: none;
+    padding-inline-start: 0;
+    padding-top: 4px;
+    margin-top: 2px;
+    border-top: 1px solid var(--c-line);
+  }
 }
 
 /* Category selector — the marketplace's primary navigation */
@@ -722,6 +746,16 @@ html[dir='rtl'] .searchbar-field + .searchbar-field { box-shadow: inset -1px 0 0
   z-index: 30;
   background: var(--c-bg);
   border-bottom: 1px solid var(--c-line);
+}
+
+/* The full search bar has too many controls to sit permanently in a sticky mobile header,
+   so a phone gets a one-line summary that opens the same bar in a sheet; desktop keeps the
+   bar inline since it has room and nothing above it competing for sticky space. */
+.mobile-search-trigger { display: none; }
+
+@media (max-width: 900px) {
+  .desktop-search { display: none; }
+  .mobile-search-trigger { display: block; }
 }
 
 /* Bottom sheet on mobile, centred dialog on desktop */

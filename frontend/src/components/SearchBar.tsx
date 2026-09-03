@@ -7,6 +7,7 @@ import { Icon } from './ui'
 
 export interface SearchBarValue {
   city: string
+  areaId: number | undefined
   date: string
   time: string
   guests: number
@@ -35,6 +36,7 @@ export function SearchBar({
   }, [])
 
   const cities = countries.flatMap((c) => c.cities)
+  const areas = cities.find((c) => c.slug === value.city)?.areas ?? []
   const today = todayInBaghdad()
 
   return (
@@ -46,18 +48,36 @@ export function SearchBar({
     >
       <label className="searchbar-field">
         <span className="label">{t('search.where')}</span>
-        <select
-          value={value.city}
-          onChange={(e) => onChange({ ...value, city: e.target.value })}
-          aria-label={t('search.where')}
-        >
-          <option value="">{t('search.anywhere')}</option>
-          {cities.map((city) => (
-            <option key={city.slug} value={city.slug}>
-              {i18n.language === 'ar' ? city.nameAr : city.nameEn}
-            </option>
-          ))}
-        </select>
+        {/* An area is a refinement of a city, so it only appears once a city narrows the
+            list enough for "which neighborhood" to be a meaningful question. */}
+        <div className="where-controls">
+          <select
+            value={value.city}
+            onChange={(e) => onChange({ ...value, city: e.target.value, areaId: undefined })}
+            aria-label={t('search.where')}
+          >
+            <option value="">{t('search.anywhere')}</option>
+            {cities.map((city) => (
+              <option key={city.slug} value={city.slug}>
+                {i18n.language === 'ar' ? city.nameAr : city.nameEn}
+              </option>
+            ))}
+          </select>
+          {areas.length > 0 && (
+            <select
+              value={value.areaId ?? ''}
+              onChange={(e) => onChange({ ...value, areaId: e.target.value ? Number(e.target.value) : undefined })}
+              aria-label={t('search.area')}
+            >
+              <option value="">{t('search.allAreas')}</option>
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>
+                  {i18n.language === 'ar' ? area.nameAr : area.nameEn}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
       </label>
 
       <label className="searchbar-field">
@@ -110,10 +130,20 @@ export function SearchBar({
 
 /// A read-only summary of the current search, used as the tap target that reopens the
 /// full search bar on small screens.
-export function SearchSummary({ value, onClick }: { value: SearchBarValue; onClick: () => void }) {
+export function SearchSummary({
+  value,
+  onClick,
+  locationLabel,
+}: {
+  value: SearchBarValue
+  onClick: () => void
+  /// A caller that already resolved city/area names (with translation and the area, if any)
+  /// can pass them in; otherwise this falls back to a plain, untranslated city slug.
+  locationLabel?: string
+}) {
   const { t, i18n } = useTranslation()
   const parts = [
-    value.city ? value.city : t('search.anywhere'),
+    locationLabel ?? (value.city ? value.city : t('search.anywhere')),
     value.date ? formatDate(value.date, i18n.language) : t('search.anyDate'),
     t('search.guestCount', { count: value.guests }),
   ]

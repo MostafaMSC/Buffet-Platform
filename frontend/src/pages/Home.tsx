@@ -17,6 +17,7 @@ export function Home() {
   const [category, setCategory] = useState<CategoryValue>('All')
   const [search, setSearch] = useState<SearchBarValue>({
     city: '',
+    areaId: undefined,
     date: todayInBaghdad(),
     time: '',
     guests: 2,
@@ -31,6 +32,7 @@ export function Home() {
   const runSearch = (overrides: Record<string, string> = {}) => {
     const params = new URLSearchParams()
     if (search.city) params.set('city', search.city)
+    if (search.areaId) params.set('areaId', String(search.areaId))
     if (search.date) params.set('date', search.date)
     if (search.time) params.set('time', search.time)
     if (search.guests) params.set('guests', String(search.guests))
