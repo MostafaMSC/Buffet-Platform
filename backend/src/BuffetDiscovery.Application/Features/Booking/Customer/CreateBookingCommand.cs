@@ -93,8 +93,18 @@ public class CreateBookingCommandHandler(
             throw new NotFoundException("Time slot not found.");
         }
 
+        // A slotted service always needs a slot to book against; falling through to
+        // service.Capacity here would silently book the wrong thing (or, for a slotted
+        // service with no whole-window capacity, throw a "doesn't accept bookings" error
+        // that's wrong — the service does take bookings, the request just didn't say which
+        // sitting).
+        if (slotEntity is null && !service.Capacity.HasValue && service.TimeSlots.Any(s => !s.IsDeleted))
+        {
+            throw new ConflictException("Please choose a sitting time.");
+        }
+
         var nominalCapacity = slotEntity?.Capacity ?? service.Capacity
-            ?? throw new ConflictException("This service does not accept bookings.");
+            ?? throw new ConflictException("This service isn't set up to take bookings yet.");
 
         await waitlistPromoter.ExpireAndPromoteAsync(
             request.TimeSlotId, service.Id, service.RestaurantId, request.Date,

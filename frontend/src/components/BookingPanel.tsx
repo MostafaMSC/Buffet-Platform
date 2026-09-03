@@ -48,12 +48,17 @@ export function BookingPanel({
       .then((data) => {
         if (cancelled) return
         setAvailability(data)
-        // Keep a chosen sitting only while it still exists and still fits the party.
         setSlotId((current) => {
-          const match = data.slots.find((s) => s.timeSlotId === current)
-          if (match && match.fitsParty && !match.isPast) return current
-          const first = data.slots.find((s) => s.fitsParty && !s.isPast)
-          return first ? first.timeSlotId : undefined
+          // Keep the current sitting while it still fits the party.
+          if (data.slots.some((s) => s.timeSlotId === current && s.fitsParty && !s.isPast)) return current
+          // Otherwise prefer any sitting that does fit.
+          const fits = data.slots.find((s) => s.fitsParty && !s.isPast)
+          if (fits) return fits.timeSlotId
+          // Nothing fits — every sitting is full. Still track a real sitting rather than
+          // dropping to no selection, so joining the waitlist has a specific sitting to
+          // queue for; the request sent to the server depends on this.
+          const any = data.slots.find((s) => !s.isPast)
+          return any ? any.timeSlotId : undefined
         })
       })
       .catch(() => { if (!cancelled) setAvailability({ ...detail.availability, slots: [] }) })
@@ -81,6 +86,9 @@ export function BookingPanel({
 
   const canBook = availability.isServedOnDate && availability.bookingEnabled && !!selectedSlot && selectedSlot.fitsParty
   const isFullDay = availability.isServedOnDate && availability.slots.length > 0 && availability.slots.every((s) => s.isFull || s.isPast)
+  // The chosen sitting itself is full — offer the waitlist for it even when another sitting
+  // that day still has room, so picking a specific full sitting always does something useful.
+  const showWaitlist = !canBook && (isFullDay || (!!selectedSlot && selectedSlot.isFull))
 
   const submit = async () => {
     setSubmitting(true)
@@ -190,7 +198,10 @@ export function BookingPanel({
                     key={slot.timeSlotId ?? 'window'}
                     type="button"
                     className={`slot-option ${slotId === slot.timeSlotId ? 'active' : ''}`}
-                    disabled={slot.isPast || slot.isFull}
+                    // A full sitting stays pickable — choosing it is how a guest tells us
+                    // which sitting to join the waitlist for; only a sitting that's already
+                    // started is truly off the table.
+                    disabled={slot.isPast}
                     onClick={() => setSlotId(slot.timeSlotId)}
                   >
                     <span className="time">{formatTime(slot.startTime, i18n.language)}</span>
@@ -240,7 +251,7 @@ export function BookingPanel({
 
         {error && <div className="alert bad">{error}</div>}
 
-        {isFullDay && !canBook ? (
+        {showWaitlist ? (
           <button className="btn secondary block" onClick={() => { setStep('details'); setOpen(true) }}>
             {t('booking.joinWaitlist')}
           </button>
@@ -272,10 +283,10 @@ export function BookingPanel({
             ) : (
               <>
                 <button className="btn ghost" onClick={() => setStep('details')}>{t('booking.back')}</button>
-                <button className="btn" disabled={submitting} onClick={isFullDay && !canBook ? addToWaitlist : submit}>
+                <button className="btn" disabled={submitting} onClick={showWaitlist ? addToWaitlist : submit}>
                   {submitting
                     ? t('booking.confirming')
-                    : isFullDay && !canBook
+                    : showWaitlist
                       ? t('booking.joinWaitlist')
                       : detail.bookingMode === 'Request'
                         ? t('booking.request')

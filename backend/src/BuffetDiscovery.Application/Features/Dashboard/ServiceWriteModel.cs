@@ -82,6 +82,13 @@ public class ServiceInputValidator : AbstractValidator<ServiceInput>
         RuleFor(x => x.CancellationCutoffMinutes).GreaterThanOrEqualTo(0).When(x => x.CancellationCutoffMinutes.HasValue);
         RuleFor(x => x.Capacity).GreaterThan(0).When(x => x.Capacity.HasValue);
 
+        // A service that is live but has neither sittings nor a whole-window capacity
+        // can't actually be booked — it would only surface as a confusing error the moment
+        // a guest tried. Catch that at save time rather than at booking time.
+        When(x => x.Status == ServiceStatus.Active, () =>
+            RuleFor(x => x).Must(x => x.Capacity.HasValue || (x.Slots?.Count ?? 0) > 0)
+                .WithMessage("An active service needs either sittings or a capacity before guests can book it."));
+
         When(x => x.PricingModel == PricingModel.PerPerson, () =>
         {
             RuleFor(x => x.PricePerAdult).GreaterThan(0)

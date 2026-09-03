@@ -36,10 +36,10 @@ public class JoinWaitlistCommandValidator : AbstractValidator<JoinWaitlistComman
 public class JoinWaitlistCommandHandler(
     IServiceRepository services,
     ITimeSlotRepository timeSlots,
-    IBookingRepository bookingRepo,
     IWaitlistRepository waitlistRepo,
     IAvailabilityRepository availability,
     IRestaurantSettingsRepository settingsRepo,
+    ISearchRepository search,
     WaitlistPromoter waitlistPromoter,
     IUnitOfWork unitOfWork) : IRequestHandler<JoinWaitlistCommand, WaitlistDetailDto>
 {
@@ -60,7 +60,6 @@ public class JoinWaitlistCommandHandler(
         }
 
         Domain.Entities.TimeSlot? slot = null;
-        int capacity;
         if (request.TimeSlotId.HasValue)
         {
             slot = await timeSlots.GetByIdAsync(request.TimeSlotId.Value, ct);
@@ -68,20 +67,33 @@ public class JoinWaitlistCommandHandler(
             {
                 throw new NotFoundException("Time slot not found.");
             }
-            capacity = slot.Capacity;
         }
-        else
+        else if (service.TimeSlots.Any(s => !s.IsDeleted))
         {
-            capacity = service.Capacity ?? throw new ConflictException("This service does not accept bookings.");
+            // A slotted service always needs to know which sitting to queue for — falling
+            // through to service.Capacity here would throw "doesn't accept bookings" for a
+            // service that plainly does, just wasn't told which slot.
+            throw new ConflictException("Please choose a sitting time to join the waitlist for.");
+        }
+        else if (!service.Capacity.HasValue)
+        {
+            throw new ConflictException("This service isn't set up to take bookings yet.");
         }
 
         var settings = await settingsRepo.GetOrCreateAsync(service.RestaurantId, ct);
-        var effectiveCapacity = CapacityCalculator.EffectiveCapacity(capacity, settings.OverbookingTolerancePercent);
 
-        await waitlistPromoter.ExpireAndPromoteAsync(request.TimeSlotId, service.Id, service.RestaurantId, request.Date, effectiveCapacity, ct);
+        // Read the same picture of the day AvailabilityCalculator gives every other
+        // caller, so "is this slot actually full" agrees with what the guest just saw on
+        // the detail page — including any capacity the restaurant overrode for this date.
+        var booked = await search.GetBookedGuestsAsync([service.Id], request.Date, ct);
+        var overrides = await search.GetSlotOverridesAsync([service.Id], request.Date, request.Date, ct);
+        var slots = AvailabilityCalculator.Build(service, request.Date, booked, overrides, settings.OverbookingTolerancePercent);
+        var slotAvailability = slots.FirstOrDefault(s => s.TimeSlotId == request.TimeSlotId)
+            ?? throw new ConflictException("This sitting is not available.");
 
-        var booked = await bookingRepo.GetBookedPartySizeAsync(request.TimeSlotId, service.Id, request.Date, ct);
-        if (booked + request.PartySize <= effectiveCapacity)
+        await waitlistPromoter.ExpireAndPromoteAsync(request.TimeSlotId, service.Id, service.RestaurantId, request.Date, slotAvailability.EffectiveCapacity, ct);
+
+        if (slotAvailability.Fits(request.PartySize))
         {
             throw new ConflictException("This slot still has room — please book directly instead of joining the waitlist.");
         }
