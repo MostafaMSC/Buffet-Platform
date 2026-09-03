@@ -3,7 +3,7 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
 
 const en = {
-  appName: 'Buffet Baghdad',
+  appName: 'Maftooh',
 
   nav: {
     main: 'Main',
@@ -627,7 +627,7 @@ const en = {
 }
 
 const ar: typeof en = {
-  appName: 'بوفيه بغداد',
+  appName: 'مفتوح',
 
   nav: {
     main: 'الرئيسية',

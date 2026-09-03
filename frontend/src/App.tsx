@@ -19,13 +19,16 @@ import { Search } from './pages/Search'
 import { ServiceDetail } from './pages/ServiceDetail'
 
 function App() {
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const location = useLocation()
 
   useEffect(() => {
     document.documentElement.dir = i18n.language === 'ar' ? 'rtl' : 'ltr'
     document.documentElement.lang = i18n.language
-  }, [i18n.language])
+    // The browser tab should read the same brand name shown in the header, in
+    // whichever language the guest is currently browsing.
+    document.title = t('appName')
+  }, [i18n.language, t])
 
   // A new page should start at the top, not wherever the previous one was scrolled to.
   useEffect(() => {
