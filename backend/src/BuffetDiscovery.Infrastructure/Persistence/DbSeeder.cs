@@ -12,6 +12,7 @@ public static class DbSeeder
         await SeedAreasAsync(db);
         await SeedAdminAsync(db);
         await SeedSampleRestaurantsAsync(db);
+        await SeedBookingSampleDataAsync(db);
     }
 
     private static async Task SeedAreasAsync(AppDbContext db)
@@ -184,6 +185,100 @@ public static class DbSeeder
                 }
             }
         }
+
+        await db.SaveChangesAsync();
+    }
+
+    /// Demo data for the Phase 2 booking system: a whole-window-capacity offering with a
+    /// couple of bookings, a slot-divided offering with a near-full slot and a waitlist
+    /// entry, and one founding/featured restaurant — so the booking widget, dashboard and
+    /// admin incentive controls all have something to show immediately after seeding.
+    private static async Task SeedBookingSampleDataAsync(AppDbContext db)
+    {
+        if (await db.Bookings.AnyAsync()) return;
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3));
+
+        var alRasheed = await db.Restaurants.Include(r => r.Offerings)
+            .FirstOrDefaultAsync(r => r.Name == "Al-Rasheed Terrace");
+        var palestine = await db.Restaurants.Include(r => r.Offerings)
+            .FirstOrDefaultAsync(r => r.Name == "Palestine Grand Buffet");
+        var zayouna = await db.Restaurants.FirstOrDefaultAsync(r => r.Name == "Zayouna Family Restaurant");
+
+        if (alRasheed is null || palestine is null || zayouna is null) return;
+
+        db.RestaurantSettings.Add(new RestaurantSettings
+        {
+            RestaurantId = alRasheed.Id,
+            IsFoundingRestaurant = true,
+            FeaturedScore = 10
+        });
+        db.RestaurantSettings.Add(new RestaurantSettings
+        {
+            RestaurantId = palestine.Id,
+            OverbookingTolerancePercent = 10
+        });
+        db.RestaurantSettings.Add(new RestaurantSettings
+        {
+            RestaurantId = zayouna.Id,
+            FeaturedScore = 5
+        });
+
+        var alRasheedLunch = alRasheed.Offerings.First(o => o.MealType == MealType.Lunch);
+        alRasheedLunch.Capacity = 40;
+        db.Bookings.Add(new Domain.Entities.Booking
+        {
+            OfferingId = alRasheedLunch.Id, TimeSlotId = null, Date = today,
+            CustomerName = "Ahmed Khalil", CustomerPhone = "07711112222", PartySize = 4,
+            Status = BookingStatus.Confirmed, ConfirmationCode = ConfirmationCodeGenerator.Generate()
+        });
+        db.Bookings.Add(new Domain.Entities.Booking
+        {
+            OfferingId = alRasheedLunch.Id, TimeSlotId = null, Date = today,
+            CustomerName = "Noor Hassan", CustomerPhone = "07733334444", PartySize = 6,
+            Status = BookingStatus.Confirmed, ConfirmationCode = ConfirmationCodeGenerator.Generate()
+        });
+
+        var palestineLunch = palestine.Offerings.First(o => o.MealType == MealType.Lunch);
+
+        // Palestine's lunch buffet only runs Friday/Saturday — seed its demo bookings on the
+        // next date it actually serves, not "today", so they show up as bookable rather than
+        // silently sitting on a day GetBookingAvailabilityQuery correctly reports as closed.
+        var palestineDate = today;
+        while (!RecurrenceEvaluator.MatchesRecurrence(palestineLunch, palestineDate))
+        {
+            palestineDate = palestineDate.AddDays(1);
+        }
+
+        var slot1 = new TimeSlot { OfferingId = palestineLunch.Id, StartTime = new TimeOnly(12, 30), EndTime = new TimeOnly(14, 15), Capacity = 20 };
+        var slot2 = new TimeSlot { OfferingId = palestineLunch.Id, StartTime = new TimeOnly(14, 15), EndTime = new TimeOnly(16, 0), Capacity = 20 };
+        db.TimeSlots.AddRange(slot1, slot2);
+        await db.SaveChangesAsync();
+
+        db.Bookings.Add(new Domain.Entities.Booking
+        {
+            OfferingId = palestineLunch.Id, TimeSlotId = slot1.Id, Date = palestineDate,
+            CustomerName = "Sara Jassim", CustomerPhone = "07755556666", PartySize = 10,
+            Status = BookingStatus.Confirmed, ConfirmationCode = ConfirmationCodeGenerator.Generate()
+        });
+        db.Bookings.Add(new Domain.Entities.Booking
+        {
+            OfferingId = palestineLunch.Id, TimeSlotId = slot1.Id, Date = palestineDate,
+            CustomerName = "Omar Fadhil", CustomerPhone = "07777778888", PartySize = 8,
+            Status = BookingStatus.Confirmed, ConfirmationCode = ConfirmationCodeGenerator.Generate()
+        });
+        db.Bookings.Add(new Domain.Entities.Booking
+        {
+            OfferingId = palestineLunch.Id, TimeSlotId = slot2.Id, Date = palestineDate,
+            CustomerName = "Hiba Adnan", CustomerPhone = "07799990000", PartySize = 4,
+            Status = BookingStatus.Confirmed, ConfirmationCode = ConfirmationCodeGenerator.Generate()
+        });
+        db.WaitlistEntries.Add(new Waitlist
+        {
+            OfferingId = palestineLunch.Id, TimeSlotId = slot1.Id, Date = palestineDate,
+            CustomerName = "Yousif Kareem", CustomerPhone = "07711119999", PartySize = 3,
+            Position = 1, Status = WaitlistStatus.Waiting
+        });
 
         await db.SaveChangesAsync();
     }

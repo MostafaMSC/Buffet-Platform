@@ -12,6 +12,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<OfferingPhoto> OfferingPhotos => Set<OfferingPhoto>();
     public DbSet<AvailabilityStatus> AvailabilityStatuses => Set<AvailabilityStatus>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<Waitlist> WaitlistEntries => Set<Waitlist>();
+    public DbSet<RestaurantSettings> RestaurantSettings => Set<RestaurantSettings>();
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

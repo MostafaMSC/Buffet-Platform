@@ -75,6 +75,62 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.ToTable("AvailabilityStatuses");
                 });
 
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ConfirmationCode")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<int>("OfferingId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PartySize")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TimeSlotId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfirmationCode")
+                        .IsUnique();
+
+                    b.HasIndex("CustomerPhone");
+
+                    b.HasIndex("OfferingId", "Date", "Status");
+
+                    b.HasIndex("TimeSlotId", "Date", "Status");
+
+                    b.ToTable("Bookings");
+                });
+
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.BuffetOffering", b =>
                 {
                     b.Property<int>("Id")
@@ -82,6 +138,9 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Capacity")
+                        .HasColumnType("integer");
 
                     b.Property<TimeOnly>("ClosesAt")
                         .HasColumnType("time without time zone");
@@ -133,6 +192,37 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.HasIndex("RestaurantId", "MealType");
 
                     b.ToTable("Offerings");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MessageAr")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId", "IsRead", "CreatedAt");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.OfferingPhoto", b =>
@@ -218,6 +308,81 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.ToTable("Restaurants");
                 });
 
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.RestaurantSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CancellationCutoffMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FeaturedScore")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsFoundingRestaurant")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("OverbookingTolerancePercent")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ReferredByRestaurantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RestaurantId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WaitlistOfferWindowMinutes")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReferredByRestaurantId");
+
+                    b.HasIndex("RestaurantId")
+                        .IsUnique();
+
+                    b.ToTable("RestaurantSettings");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.TimeSlot", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BufferMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("OfferingId")
+                        .HasColumnType("integer");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfferingId", "IsDeleted");
+
+                    b.ToTable("TimeSlots");
+                });
+
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -253,6 +418,57 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Waitlist", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("NotifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("OfferingId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PartySize")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TimeSlotId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerPhone");
+
+                    b.HasIndex("OfferingId", "Date", "Status", "Position");
+
+                    b.HasIndex("TimeSlotId", "Date", "Status", "Position");
+
+                    b.ToTable("WaitlistEntries");
+                });
+
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.AvailabilityStatus", b =>
                 {
                     b.HasOne("BuffetDiscovery.Domain.Entities.BuffetOffering", "Offering")
@@ -264,10 +480,39 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.Navigation("Offering");
                 });
 
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Booking", b =>
+                {
+                    b.HasOne("BuffetDiscovery.Domain.Entities.BuffetOffering", "Offering")
+                        .WithMany("Bookings")
+                        .HasForeignKey("OfferingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BuffetDiscovery.Domain.Entities.TimeSlot", "TimeSlot")
+                        .WithMany("Bookings")
+                        .HasForeignKey("TimeSlotId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Offering");
+
+                    b.Navigation("TimeSlot");
+                });
+
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.BuffetOffering", b =>
                 {
                     b.HasOne("BuffetDiscovery.Domain.Entities.Restaurant", "Restaurant")
                         .WithMany("Offerings")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("BuffetDiscovery.Domain.Entities.Restaurant", "Restaurant")
+                        .WithMany()
                         .HasForeignKey("RestaurantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -297,6 +542,35 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                     b.Navigation("Area");
                 });
 
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.RestaurantSettings", b =>
+                {
+                    b.HasOne("BuffetDiscovery.Domain.Entities.Restaurant", "ReferredBy")
+                        .WithMany()
+                        .HasForeignKey("ReferredByRestaurantId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("BuffetDiscovery.Domain.Entities.Restaurant", "Restaurant")
+                        .WithOne("Settings")
+                        .HasForeignKey("BuffetDiscovery.Domain.Entities.RestaurantSettings", "RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReferredBy");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.TimeSlot", b =>
+                {
+                    b.HasOne("BuffetDiscovery.Domain.Entities.BuffetOffering", "Offering")
+                        .WithMany("TimeSlots")
+                        .HasForeignKey("OfferingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Offering");
+                });
+
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.User", b =>
                 {
                     b.HasOne("BuffetDiscovery.Domain.Entities.Restaurant", "Restaurant")
@@ -305,6 +579,24 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Waitlist", b =>
+                {
+                    b.HasOne("BuffetDiscovery.Domain.Entities.BuffetOffering", "Offering")
+                        .WithMany()
+                        .HasForeignKey("OfferingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("BuffetDiscovery.Domain.Entities.TimeSlot", "TimeSlot")
+                        .WithMany("WaitlistEntries")
+                        .HasForeignKey("TimeSlotId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Offering");
+
+                    b.Navigation("TimeSlot");
                 });
 
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Area", b =>
@@ -316,14 +608,27 @@ namespace BuffetDiscovery.Infrastructure.Persistence.Migrations
                 {
                     b.Navigation("AvailabilityStatuses");
 
+                    b.Navigation("Bookings");
+
                     b.Navigation("Photos");
+
+                    b.Navigation("TimeSlots");
                 });
 
             modelBuilder.Entity("BuffetDiscovery.Domain.Entities.Restaurant", b =>
                 {
                     b.Navigation("Offerings");
 
+                    b.Navigation("Settings");
+
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("BuffetDiscovery.Domain.Entities.TimeSlot", b =>
+                {
+                    b.Navigation("Bookings");
+
+                    b.Navigation("WaitlistEntries");
                 });
 #pragma warning restore 612, 618
         }

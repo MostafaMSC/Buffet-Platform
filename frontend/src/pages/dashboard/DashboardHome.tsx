@@ -65,9 +65,17 @@ export function DashboardHome() {
             <strong>{isAr ? profile.nameAr : profile.name}</strong>
             <div style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)' }}>{profile.areaNameEn}</div>
           </div>
-          <Link className="btn small secondary" to="/dashboard/profile">
-            {t('dashboard.editProfile')}
-          </Link>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <Link className="btn small secondary" to="/dashboard/bookings">
+              {t('bookingDashboard.title')}
+            </Link>
+            <Link className="btn small secondary" to="/dashboard/booking-settings">
+              {t('bookingSettings.title')}
+            </Link>
+            <Link className="btn small secondary" to="/dashboard/profile">
+              {t('dashboard.editProfile')}
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -94,6 +102,9 @@ export function DashboardHome() {
                 {desc && <div style={{ fontSize: '0.85rem', marginTop: '0.25rem' }}>{desc}</div>}
               </div>
               <div className="offering-manage-actions">
+                <Link className="btn small secondary" to={`/dashboard/offerings/${o.id}/booking`}>
+                  {t('bookingSetup.manageLink')}
+                </Link>
                 <Link className="btn small secondary" to={`/dashboard/offerings/${o.id}/edit`}>
                   {t('dashboard.editOffering')}
                 </Link>

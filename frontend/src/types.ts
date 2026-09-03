@@ -29,6 +29,7 @@ export interface OfferingListItem {
   price: number
   opensAt: string
   closesAt: string
+  isFoundingRestaurant: boolean
 }
 
 export interface RestaurantOffering {
@@ -57,6 +58,7 @@ export interface RestaurantDetail {
   descriptionAr: string | null
   logoUrl: string | null
   coverPhotoUrl: string | null
+  isFoundingRestaurant: boolean
   offerings: RestaurantOffering[]
 }
 
@@ -131,4 +133,156 @@ export interface RestaurantAdminListItem {
   status: RestaurantStatus
   createdAt: string
   offeringCount: number
+}
+
+// ---------- Booking (Phase 2) ----------
+
+export type BookingStatus = 'Confirmed' | 'Waitlisted' | 'Cancelled' | 'NoShow' | 'Completed'
+export type WaitlistStatus = 'Waiting' | 'Offered' | 'Expired' | 'Converted'
+
+export interface TimeSlot {
+  id: number
+  startTime: string
+  endTime: string
+  capacity: number
+  bufferMinutes: number
+}
+
+export interface OfferingCapacity {
+  offeringId: number
+  capacity: number | null
+  slots: TimeSlot[]
+}
+
+export interface RestaurantSettings {
+  cancellationCutoffMinutes: number
+  waitlistOfferWindowMinutes: number
+  overbookingTolerancePercent: number
+  isFoundingRestaurant: boolean
+  referredByRestaurantId: number | null
+  featuredScore: number
+}
+
+export interface SlotAvailability {
+  timeSlotId: number | null
+  startTime: string
+  endTime: string
+  capacity: number
+  booked: number
+  remaining: number
+  isFull: boolean
+  waitlistLength: number
+}
+
+export interface BookingAvailability {
+  offeringId: number
+  date: string
+  bookingEnabled: boolean
+  slots: SlotAvailability[]
+}
+
+export interface BookingDetail {
+  id: number
+  confirmationCode: string
+  restaurantId: number
+  restaurantName: string
+  restaurantNameAr: string
+  offeringId: number
+  mealType: MealType
+  date: string
+  slotStartTime: string | null
+  slotEndTime: string | null
+  customerName: string
+  customerPhone: string
+  partySize: number
+  status: BookingStatus
+  createdAt: string
+}
+
+export interface WaitlistDetail {
+  id: number
+  restaurantId: number
+  restaurantName: string
+  restaurantNameAr: string
+  offeringId: number
+  mealType: MealType
+  date: string
+  slotStartTime: string | null
+  slotEndTime: string | null
+  customerName: string
+  customerPhone: string
+  partySize: number
+  position: number
+  status: WaitlistStatus
+  notifiedAt: string | null
+  offerWindowMinutes: number
+}
+
+export interface MyLookupResult {
+  bookings: BookingDetail[]
+  waitlistEntries: WaitlistDetail[]
+}
+
+export interface RestaurantBookingListItem {
+  id: number
+  confirmationCode: string
+  customerName: string
+  customerPhone: string
+  partySize: number
+  status: BookingStatus
+  createdAt: string
+}
+
+export interface RestaurantBookingGroup {
+  offeringId: number
+  mealType: MealType
+  date: string
+  timeSlotId: number | null
+  startTime: string
+  endTime: string
+  capacity: number
+  effectiveCapacity: number
+  bookedPartySize: number
+  bookings: RestaurantBookingListItem[]
+}
+
+export interface DailyBookingStat {
+  date: string
+  totalPartySize: number
+  bookingCount: number
+}
+
+export interface SlotBookingStat {
+  timeSlotId: number | null
+  label: string
+  totalPartySize: number
+  bookingCount: number
+}
+
+export interface BookingAnalytics {
+  totalBookings: number
+  completedCount: number
+  noShowCount: number
+  cancelledCount: number
+  noShowRatePercent: number
+  byDate: DailyBookingStat[]
+  bySlot: SlotBookingStat[]
+}
+
+export interface PlatformBookingStats {
+  totalBookings: number
+  totalPartySize: number
+  restaurantsWithBookings: number
+  byDate: DailyBookingStat[]
+}
+
+export interface AdminRestaurantSettings {
+  restaurantId: number
+  restaurantName: string
+  cancellationCutoffMinutes: number
+  overbookingTolerancePercent: number
+  isFoundingRestaurant: boolean
+  featuredScore: number
+  referredByRestaurantId: number | null
+  referredByName: string | null
 }

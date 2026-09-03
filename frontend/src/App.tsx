@@ -5,7 +5,9 @@ import { Header } from './components/Header'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminDashboard } from './pages/AdminDashboard'
 import { AdminLogin } from './pages/AdminLogin'
+import { BookingBadge } from './pages/BookingBadge'
 import { CustomerHome } from './pages/CustomerHome'
+import { MyBookings } from './pages/MyBookings'
 import { RestaurantDashboard } from './pages/RestaurantDashboard'
 import { RestaurantDetail } from './pages/RestaurantDetail'
 import { RestaurantLogin } from './pages/RestaurantLogin'
@@ -26,6 +28,8 @@ function App() {
         <Routes>
           <Route path="/" element={<CustomerHome />} />
           <Route path="/restaurants/:id" element={<RestaurantDetail />} />
+          <Route path="/bookings/:code" element={<BookingBadge />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/restaurant/login" element={<RestaurantLogin />} />
           <Route path="/restaurant/signup" element={<RestaurantSignup />} />
           <Route

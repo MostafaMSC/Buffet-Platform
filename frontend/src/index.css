@@ -746,6 +746,141 @@ table.admin-table tr:last-child td {
   gap: 0.35rem;
 }
 
+/* ---------- Booking ---------- */
+
+.booking-widget {
+  border-top: 1px dashed var(--color-border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.booking-widget-title {
+  font-size: 0.95rem;
+  margin: 0 0 0.6rem;
+}
+
+.slot-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.slot-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg);
+  cursor: pointer;
+  font-size: 0.85rem;
+  text-align: start;
+}
+
+.slot-option.active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.slot-option.full {
+  opacity: 0.75;
+}
+
+.slot-option-status {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.booking-form {
+  max-width: 520px;
+}
+
+.booking-success {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.booking-code {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0.5rem 0 0.9rem;
+}
+
+.booking-code.large {
+  font-size: 2rem;
+  margin: 1rem 0;
+}
+
+.booking-badge {
+  text-align: center;
+}
+
+.booking-badge-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  text-align: start;
+  margin: 1rem 0;
+}
+
+.booking-badge-details dt {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.booking-badge-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.analytics-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+}
+
+.analytics-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.analytics-label {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.booking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.my-booking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
 /* ---------- RTL adjustments ---------- */
 
 html[dir='rtl'] .form-row,

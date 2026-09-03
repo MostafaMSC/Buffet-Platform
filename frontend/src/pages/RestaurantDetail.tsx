@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
+import { BookingWidget } from '../components/BookingWidget'
 import type { RestaurantDetail as RestaurantDetailType } from '../types'
 import { getVideoEmbedUrl, isDirectVideoFile } from '../utils/video'
 
@@ -42,6 +43,7 @@ export function RestaurantDetail() {
 
       <div className="detail-header">
         <h1>{name}</h1>
+        {restaurant.isFoundingRestaurant && <span className="badge accent">{t('foundingBadgeLong')}</span>}
         <div className="area">{areaName}</div>
         {restaurant.address && (
           <div className="area" style={{ marginTop: '-0.5rem' }}>
@@ -90,6 +92,7 @@ export function RestaurantDetail() {
                 ))}
               </div>
             )}
+            <BookingWidget offeringId={o.id} />
           </div>
         )
       })}

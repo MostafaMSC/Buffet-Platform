@@ -17,6 +17,12 @@ public interface IOfferingRepository
     /// A single offering by id regardless of owner (admin use), with Photos included.
     Task<BuffetOffering?> GetByIdAsync(int offeringId, CancellationToken ct);
 
+    /// A single non-deleted offering belonging to an Approved restaurant, with Restaurant
+    /// included. Used for booking (public availability/creation must not work against a
+    /// deleted offering or a restaurant that's been suspended/rejected since the customer
+    /// last loaded the page).
+    Task<BuffetOffering?> GetApprovedByIdAsync(int offeringId, CancellationToken ct);
+
     void Add(BuffetOffering offering);
     void RemovePhotos(IEnumerable<OfferingPhoto> photos);
 }

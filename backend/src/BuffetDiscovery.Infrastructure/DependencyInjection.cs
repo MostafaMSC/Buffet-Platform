@@ -23,9 +23,14 @@ public static class DependencyInjection
         services.AddScoped<IOfferingRepository, OfferingRepository>();
         services.AddScoped<IAvailabilityRepository, AvailabilityRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IWaitlistRepository, WaitlistRepository>();
+        services.AddScoped<IRestaurantSettingsRepository, RestaurantSettingsRepository>();
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         services.Configure<FileStorageOptions>(o => o.UploadsRootPath = uploadsRootPath);
         services.AddScoped<IFileStorageService, LocalFileStorageService>();

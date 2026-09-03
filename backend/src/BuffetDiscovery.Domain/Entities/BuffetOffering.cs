@@ -29,6 +29,14 @@ public class BuffetOffering
     public bool IsDeleted { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    /// Whole-window booking capacity (max total party size for the entire OpensAt-ClosesAt
+    /// window on a given date), used only when this offering has no TimeSlots — i.e. the
+    /// restaurant chose not to split it into slots. Null means bookings aren't accepted for
+    /// this offering at all.
+    public int? Capacity { get; set; }
+
     public List<OfferingPhoto> Photos { get; set; } = [];
     public List<AvailabilityStatus> AvailabilityStatuses { get; set; } = [];
+    public List<TimeSlot> TimeSlots { get; set; } = [];
+    public List<Booking> Bookings { get; set; } = [];
 }

@@ -24,4 +24,5 @@ public class Restaurant
 
     public List<BuffetOffering> Offerings { get; set; } = [];
     public List<User> Users { get; set; } = [];
+    public RestaurantSettings? Settings { get; set; }
 }

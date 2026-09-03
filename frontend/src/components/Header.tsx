@@ -26,6 +26,9 @@ export function Header() {
         </Link>
 
         <div className="header-actions">
+          <Link className="nav-link" to="/my-bookings">
+            {t('nav.myBookings')}
+          </Link>
           {!token && (
             <>
               <Link className="nav-link" to="/restaurant/login">

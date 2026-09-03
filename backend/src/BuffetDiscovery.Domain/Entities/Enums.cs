@@ -42,3 +42,20 @@ public enum WeekDays
     Saturday = 32,
     Sunday = 64
 }
+
+public enum BookingStatus
+{
+    Confirmed,
+    Waitlisted,
+    Cancelled,
+    NoShow,
+    Completed
+}
+
+public enum WaitlistStatus
+{
+    Waiting,
+    Offered,
+    Expired,
+    Converted
+}

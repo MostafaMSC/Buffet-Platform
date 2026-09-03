@@ -9,12 +9,15 @@ public record GetRestaurantDetailQuery(int Id, DateOnly? Date) : IRequest<Restau
 
 public class GetRestaurantDetailQueryHandler(
     IRestaurantRepository restaurants,
-    IAvailabilityRepository availability) : IRequestHandler<GetRestaurantDetailQuery, RestaurantDetailDto?>
+    IAvailabilityRepository availability,
+    IRestaurantSettingsRepository settingsRepo) : IRequestHandler<GetRestaurantDetailQuery, RestaurantDetailDto?>
 {
     public async Task<RestaurantDetailDto?> Handle(GetRestaurantDetailQuery request, CancellationToken ct)
     {
         var restaurant = await restaurants.GetApprovedWithOfferingsAsync(request.Id, ct);
         if (restaurant is null) return null;
+
+        var settings = await settingsRepo.GetByRestaurantIdAsync(restaurant.Id, ct);
 
         var targetDate = request.Date ?? DateOnly.FromDateTime(DateTime.UtcNow.AddHours(3));
 
@@ -53,6 +56,7 @@ public class GetRestaurantDetailQueryHandler(
             restaurant.DescriptionAr,
             restaurant.LogoUrl,
             restaurant.CoverPhotoUrl,
+            settings?.IsFoundingRestaurant ?? false,
             offeringDtos
         );
     }

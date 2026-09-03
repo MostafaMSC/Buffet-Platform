@@ -14,7 +14,8 @@ public record OfferingListItemDto(
     MealType MealType,
     decimal Price,
     string OpensAt,
-    string ClosesAt
+    string ClosesAt,
+    bool IsFoundingRestaurant
 );
 
 public record RestaurantDetailDto(
@@ -30,6 +31,7 @@ public record RestaurantDetailDto(
     string? DescriptionAr,
     string? LogoUrl,
     string? CoverPhotoUrl,
+    bool IsFoundingRestaurant,
     List<RestaurantOfferingDto> Offerings
 );
 

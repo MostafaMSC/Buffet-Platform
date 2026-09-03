@@ -59,4 +59,23 @@ public class AdminController(ISender mediator) : ControllerBase
         await mediator.Send(new AdminDeleteOfferingCommand(id), ct);
         return NoContent();
     }
+
+    [HttpGet("booking-settings")]
+    public async Task<ActionResult<List<AdminRestaurantSettingsDto>>> GetBookingSettings(CancellationToken ct)
+    {
+        return Ok(await mediator.Send(new GetAdminBookingSettingsQuery(), ct));
+    }
+
+    [HttpPut("booking-settings/{restaurantId:int}")]
+    public async Task<IActionResult> UpdateBookingSettings(int restaurantId, UpdateAdminRestaurantSettingsCommand command, CancellationToken ct)
+    {
+        await mediator.Send(command with { RestaurantId = restaurantId }, ct);
+        return NoContent();
+    }
+
+    [HttpGet("bookings/stats")]
+    public async Task<ActionResult<PlatformBookingStatsDto>> GetBookingStats([FromQuery] DateOnly start, [FromQuery] DateOnly end, CancellationToken ct)
+    {
+        return Ok(await mediator.Send(new GetPlatformBookingStatsQuery(start, end), ct));
+    }
 }

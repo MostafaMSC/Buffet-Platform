@@ -39,6 +39,11 @@ public class OfferingRepository(AppDbContext db) : IOfferingRepository
     public Task<BuffetOffering?> GetByIdAsync(int offeringId, CancellationToken ct) =>
         db.Offerings.Include(o => o.Photos).FirstOrDefaultAsync(o => o.Id == offeringId, ct);
 
+    public Task<BuffetOffering?> GetApprovedByIdAsync(int offeringId, CancellationToken ct) =>
+        db.Offerings
+            .Include(o => o.Restaurant)
+            .FirstOrDefaultAsync(o => o.Id == offeringId && !o.IsDeleted && o.Restaurant!.Status == RestaurantStatus.Approved, ct);
+
     public void Add(BuffetOffering offering) => db.Offerings.Add(offering);
 
     public void RemovePhotos(IEnumerable<OfferingPhoto> photos) => db.OfferingPhotos.RemoveRange(photos);

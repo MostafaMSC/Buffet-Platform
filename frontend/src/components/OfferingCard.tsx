@@ -15,6 +15,7 @@ export function OfferingCard({ offering }: { offering: OfferingListItem }) {
       </div>
       <div className="offering-card-body">
         <span className="badge">{t(`mealType.${offering.mealType}`)}</span>
+        {offering.isFoundingRestaurant && <span className="badge accent">{t('foundingBadgeShort')}</span>}
         <div className="offering-card-title">{restaurantName}</div>
         <div className="offering-card-meta">
           <span>{areaName}</span>

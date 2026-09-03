@@ -1,5 +1,6 @@
 using System.Reflection;
 using BuffetDiscovery.Application.Common.Behaviors;
+using BuffetDiscovery.Application.Features.Booking.Customer;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,8 @@ public static class DependencyInjection
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
         services.AddValidatorsFromAssembly(assembly);
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+        services.AddScoped<WaitlistPromoter>();
 
         return services;
     }

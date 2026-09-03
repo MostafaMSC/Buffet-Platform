@@ -15,6 +15,7 @@ public record BrowseOfferingsQuery(DateOnly? Date, int? AreaId, MealType? MealTy
 public class BrowseOfferingsQueryHandler(
     IOfferingRepository offerings,
     IAvailabilityRepository availability,
+    IRestaurantSettingsRepository settingsRepo,
     IUnitOfWork unitOfWork) : IRequestHandler<BrowseOfferingsQuery, List<OfferingListItemDto>>
 {
     public async Task<List<OfferingListItemDto>> Handle(BrowseOfferingsQuery request, CancellationToken ct)
@@ -31,8 +32,10 @@ public class BrowseOfferingsQueryHandler(
 
         var offeringIds = matching.Select(o => o.Id).ToList();
         var overrides = await availability.GetForDateAsync(offeringIds, targetDate, ct);
+        var restaurantIds = matching.Select(o => o.RestaurantId).Distinct().ToList();
+        var settingsByRestaurant = await settingsRepo.GetForRestaurantsAsync(restaurantIds, ct);
 
-        var result = new List<OfferingListItemDto>();
+        var result = new List<(OfferingListItemDto Dto, int FeaturedScore)>();
 
         foreach (var offering in matching)
         {
@@ -50,24 +53,34 @@ public class BrowseOfferingsQueryHandler(
             if (!isActive) continue;
 
             var restaurant = offering.Restaurant!;
-            result.Add(new OfferingListItemDto(
-                offering.Id,
-                restaurant.Id,
-                restaurant.Name,
-                restaurant.NameAr,
-                restaurant.AreaId,
-                restaurant.Area!.NameEn,
-                restaurant.Area!.NameAr,
-                restaurant.CoverPhotoUrl,
-                offering.MealType,
-                offering.Price,
-                offering.OpensAt.ToString("HH:mm"),
-                offering.ClosesAt.ToString("HH:mm")
+            settingsByRestaurant.TryGetValue(restaurant.Id, out var settings);
+
+            result.Add((
+                new OfferingListItemDto(
+                    offering.Id,
+                    restaurant.Id,
+                    restaurant.Name,
+                    restaurant.NameAr,
+                    restaurant.AreaId,
+                    restaurant.Area!.NameEn,
+                    restaurant.Area!.NameAr,
+                    restaurant.CoverPhotoUrl,
+                    offering.MealType,
+                    offering.Price,
+                    offering.OpensAt.ToString("HH:mm"),
+                    offering.ClosesAt.ToString("HH:mm"),
+                    settings?.IsFoundingRestaurant ?? false
+                ),
+                settings?.FeaturedScore ?? 0
             ));
         }
 
         await unitOfWork.SaveChangesAsync(ct);
 
-        return result.OrderBy(r => r.RestaurantName).ToList();
+        return result
+            .OrderByDescending(r => r.FeaturedScore)
+            .ThenBy(r => r.Dto.RestaurantName)
+            .Select(r => r.Dto)
+            .ToList();
     }
 }
