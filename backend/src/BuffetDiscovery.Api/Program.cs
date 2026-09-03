@@ -8,6 +8,7 @@ using BuffetDiscovery.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +67,30 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.DuplicateTable)
+    {
+        // The migration history was rewritten when the schema moved from Offerings to
+        // Services, so a database created before that still holds the old tables while its
+        // history knows nothing about the new migration. There is no incremental path
+        // between the two shapes: the database has to be recreated.
+        var database = db.Database.GetDbConnection().Database;
+        throw new InvalidOperationException(
+            $"""
+            The '{database}' database was built by an older version of this project and cannot be migrated in place.
+
+            Drop and recreate it, then start the API again — the seeder will repopulate the demo data:
+
+                dotnet ef database drop --force --project src/BuffetDiscovery.Infrastructure --startup-project src/BuffetDiscovery.Api
+
+            Any data you added by hand will be lost.
+            """, ex);
+    }
+
     await DbSeeder.SeedAsync(db);
 }
 
