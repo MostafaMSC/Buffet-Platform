@@ -4,8 +4,8 @@ public class TimeSlot
 {
     public int Id { get; set; }
 
-    public int OfferingId { get; set; }
-    public BuffetOffering? Offering { get; set; }
+    public int ServiceId { get; set; }
+    public Service? Service { get; set; }
 
     public TimeOnly StartTime { get; set; }
     public TimeOnly EndTime { get; set; }
@@ -22,4 +22,5 @@ public class TimeSlot
 
     public List<Booking> Bookings { get; set; } = [];
     public List<Waitlist> WaitlistEntries { get; set; } = [];
+    public List<SlotOverride> Overrides { get; set; } = [];
 }

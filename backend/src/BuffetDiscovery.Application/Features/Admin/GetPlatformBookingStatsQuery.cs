@@ -21,7 +21,7 @@ public class GetPlatformBookingStatsQueryHandler(IBookingRepository bookingRepo)
             .OrderBy(x => x.Date)
             .ToList();
 
-        var restaurantsWithBookings = bookings.Select(b => b.Offering!.RestaurantId).Distinct().Count();
+        var restaurantsWithBookings = bookings.Select(b => b.Service!.RestaurantId).Distinct().Count();
 
         return new PlatformBookingStatsDto(bookings.Count, bookings.Sum(b => b.PartySize), restaurantsWithBookings, byDate);
     }

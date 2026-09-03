@@ -4,10 +4,10 @@ public class Waitlist
 {
     public int Id { get; set; }
 
-    public int OfferingId { get; set; }
-    public BuffetOffering? Offering { get; set; }
+    public int ServiceId { get; set; }
+    public Service? Service { get; set; }
 
-    /// Null when the offering isn't slot-divided, same nullable-with-offering-fallback
+    /// Null when the service isn't slot-divided, same nullable-with-service-fallback
     /// shape as Booking.TimeSlotId.
     public int? TimeSlotId { get; set; }
     public TimeSlot? TimeSlot { get; set; }
@@ -18,7 +18,7 @@ public class Waitlist
     public string CustomerPhone { get; set; } = string.Empty;
     public int PartySize { get; set; }
 
-    /// 1-based position in the queue for this (OfferingId/TimeSlotId, Date).
+    /// 1-based position in the queue for this (ServiceId/TimeSlotId, Date).
     public int Position { get; set; }
 
     public WaitlistStatus Status { get; set; } = WaitlistStatus.Waiting;

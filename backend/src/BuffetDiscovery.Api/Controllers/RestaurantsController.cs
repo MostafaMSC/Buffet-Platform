@@ -10,7 +10,7 @@ namespace BuffetDiscovery.Api.Controllers;
 public class RestaurantsController(ISender mediator) : ControllerBase
 {
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<RestaurantDetailDto>> GetById(int id, [FromQuery] DateOnly? date, CancellationToken ct)
+    public async Task<ActionResult<RestaurantPageDto>> GetById(int id, [FromQuery] DateOnly? date, CancellationToken ct)
     {
         var result = await mediator.Send(new GetRestaurantDetailQuery(id, date), ct);
         return result is null ? NotFound() : Ok(result);

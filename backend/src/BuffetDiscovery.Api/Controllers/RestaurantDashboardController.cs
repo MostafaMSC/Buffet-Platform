@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BuffetDiscovery.Api.Controllers;
 
+/// The restaurant's own management surface: profile, services (with menus and sittings),
+/// day-by-day availability and the calendar.
 [ApiController]
 [Route("api/dashboard")]
 [Authorize(Roles = "RestaurantOwner")]
@@ -24,34 +26,54 @@ public class RestaurantDashboardController(ISender mediator) : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("offerings")]
-    public async Task<ActionResult<List<DashboardOfferingDto>>> GetOfferings([FromQuery] int days = 14, CancellationToken ct = default)
+    [HttpGet("services")]
+    public async Task<ActionResult<List<DashboardServiceDto>>> GetServices([FromQuery] int days = 14, CancellationToken ct = default)
     {
-        return Ok(await mediator.Send(new GetDashboardOfferingsQuery(days), ct));
+        return Ok(await mediator.Send(new GetDashboardServicesQuery(days), ct));
     }
 
-    [HttpPost("offerings")]
-    public async Task<ActionResult<int>> CreateOffering(CreateOfferingCommand command, CancellationToken ct)
+    [HttpGet("services/{id:int}")]
+    public async Task<ActionResult<ServiceEditorDto>> GetService(int id, CancellationToken ct)
     {
-        return Ok(await mediator.Send(command, ct));
+        return Ok(await mediator.Send(new GetServiceEditorQuery(id), ct));
     }
 
-    [HttpPut("offerings/{id:int}")]
-    public async Task<IActionResult> UpdateOffering(int id, UpdateOfferingCommand command, CancellationToken ct)
+    [HttpPost("services")]
+    public async Task<ActionResult<int>> CreateService(ServiceInput service, CancellationToken ct)
     {
-        await mediator.Send(command with { Id = id }, ct);
+        return Ok(await mediator.Send(new CreateServiceCommand(service), ct));
+    }
+
+    [HttpPut("services/{id:int}")]
+    public async Task<IActionResult> UpdateService(int id, ServiceInput service, CancellationToken ct)
+    {
+        await mediator.Send(new UpdateServiceCommand(id, service), ct);
         return NoContent();
     }
 
-    [HttpDelete("offerings/{id:int}")]
-    public async Task<IActionResult> DeleteOffering(int id, CancellationToken ct)
+    [HttpDelete("services/{id:int}")]
+    public async Task<IActionResult> DeleteService(int id, CancellationToken ct)
     {
-        await mediator.Send(new DeleteOfferingCommand(id), ct);
+        await mediator.Send(new DeleteServiceCommand(id), ct);
         return NoContent();
     }
 
     [HttpPost("availability/toggle")]
-    public async Task<IActionResult> Toggle(ToggleAvailabilityCommand command, CancellationToken ct)
+    public async Task<IActionResult> ToggleAvailability(ToggleAvailabilityCommand command, CancellationToken ct)
+    {
+        await mediator.Send(command, ct);
+        return NoContent();
+    }
+
+    [HttpGet("calendar")]
+    public async Task<ActionResult<List<CalendarDayDto>>> GetCalendar(
+        [FromQuery] DateOnly from, [FromQuery] DateOnly to, [FromQuery] int? serviceId, CancellationToken ct)
+    {
+        return Ok(await mediator.Send(new GetCalendarQuery(from, to, serviceId), ct));
+    }
+
+    [HttpPut("calendar/slot-override")]
+    public async Task<IActionResult> SetSlotOverride(SetSlotOverrideCommand command, CancellationToken ct)
     {
         await mediator.Send(command, ct);
         return NoContent();

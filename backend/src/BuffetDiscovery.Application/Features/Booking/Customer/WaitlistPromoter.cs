@@ -14,9 +14,9 @@ public class WaitlistPromoter(
     IRestaurantSettingsRepository settingsRepo,
     INotificationService notifications)
 {
-    public async Task ExpireAndPromoteAsync(int? timeSlotId, int offeringId, int restaurantId, DateOnly date, int capacity, CancellationToken ct)
+    public async Task ExpireAndPromoteAsync(int? timeSlotId, int serviceId, int restaurantId, DateOnly date, int capacity, CancellationToken ct)
     {
-        var queue = await waitlistRepo.GetQueueAsync(timeSlotId, offeringId, date, ct);
+        var queue = await waitlistRepo.GetQueueAsync(timeSlotId, serviceId, date, ct);
         if (queue.Count == 0) return;
 
         var settings = await settingsRepo.GetOrCreateAsync(restaurantId, ct);
@@ -35,7 +35,7 @@ public class WaitlistPromoter(
             queue.Remove(activeOffer);
         }
 
-        var bookedPartySize = await bookingRepo.GetBookedPartySizeAsync(timeSlotId, offeringId, date, ct);
+        var bookedPartySize = await bookingRepo.GetBookedPartySizeAsync(timeSlotId, serviceId, date, ct);
         var next = queue
             .Where(w => w.Status == WaitlistStatus.Waiting)
             .OrderBy(w => w.Position)

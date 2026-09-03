@@ -4,7 +4,7 @@ namespace BuffetDiscovery.Application.Common.Dtos;
 
 public record TimeSlotDto(int Id, string StartTime, string EndTime, int Capacity, int BufferMinutes);
 
-public record OfferingCapacityDto(int OfferingId, int? Capacity, List<TimeSlotDto> Slots);
+public record ServiceCapacityDto(int ServiceId, int? Capacity, List<TimeSlotDto> Slots);
 
 public record SlotAvailabilityDto(
     int? TimeSlotId,
@@ -17,7 +17,7 @@ public record SlotAvailabilityDto(
     int WaitlistLength
 );
 
-public record BookingAvailabilityDto(int OfferingId, DateOnly Date, bool BookingEnabled, List<SlotAvailabilityDto> Slots);
+public record BookingAvailabilityDto(int ServiceId, DateOnly Date, bool BookingEnabled, List<SlotAvailabilityDto> Slots);
 
 public record BookingDetailDto(
     int Id,
@@ -25,15 +25,31 @@ public record BookingDetailDto(
     int RestaurantId,
     string RestaurantName,
     string RestaurantNameAr,
-    int OfferingId,
+    string RestaurantPhone,
+    string AreaName,
+    string AreaNameAr,
+    string CityName,
+    string CityNameAr,
+    int ServiceId,
+    ServiceType ServiceType,
+    string ServiceName,
+    string ServiceNameAr,
     MealType MealType,
+    string? PhotoUrl,
     DateOnly Date,
     string? SlotStartTime,
     string? SlotEndTime,
     string CustomerName,
     string CustomerPhone,
+    string? CustomerEmail,
+    string? SpecialRequests,
     int PartySize,
+    int Adults,
+    int Children,
+    decimal TotalPrice,
+    string CurrencyCode,
     BookingStatus Status,
+    int CancellationCutoffMinutes,
     DateTime CreatedAt
 );
 
@@ -42,7 +58,7 @@ public record WaitlistDetailDto(
     int RestaurantId,
     string RestaurantName,
     string RestaurantNameAr,
-    int OfferingId,
+    int ServiceId,
     MealType MealType,
     DateOnly Date,
     string? SlotStartTime,
@@ -72,13 +88,21 @@ public record RestaurantBookingListItemDto(
     string ConfirmationCode,
     string CustomerName,
     string CustomerPhone,
+    string? CustomerEmail,
+    string? SpecialRequests,
     int PartySize,
+    int Adults,
+    int Children,
+    decimal TotalPrice,
     BookingStatus Status,
     DateTime CreatedAt
 );
 
 public record RestaurantBookingGroupDto(
-    int OfferingId,
+    int ServiceId,
+    string ServiceName,
+    string ServiceNameAr,
+    ServiceType ServiceType,
     MealType MealType,
     DateOnly Date,
     int? TimeSlotId,
@@ -88,6 +112,26 @@ public record RestaurantBookingGroupDto(
     int EffectiveCapacity,
     int BookedPartySize,
     List<RestaurantBookingListItemDto> Bookings
+);
+
+/// The numbers the restaurant sees first thing each day.
+public record DashboardOverviewDto(
+    DateOnly Date,
+    int TodayBookings,
+    int TodayGuests,
+    int PendingRequests,
+    int UpcomingBookings,
+    int UpcomingGuests,
+    decimal TodayRevenue,
+    decimal Revenue30Days,
+    int BuffetBookings30Days,
+    int SetMenuBookings30Days,
+    double NoShowRatePercent,
+    double CancellationRatePercent,
+    string? TopServiceName,
+    string? TopServiceNameAr,
+    int TopServiceBookings,
+    List<DailyBookingStatDto> Last14Days
 );
 
 public record DailyBookingStatDto(DateOnly Date, int TotalPartySize, int BookingCount);

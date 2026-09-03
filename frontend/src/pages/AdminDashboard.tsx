@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
+import { Badge, EmptyState, Skeleton } from '../components/ui'
 import type { AdminRestaurantSettings, PlatformBookingStats, RestaurantAdminListItem } from '../types'
-
-function todayBaghdad() {
-  const now = new Date()
-  const baghdad = new Date(now.getTime() + (3 * 60 - now.getTimezoneOffset()) * 60000)
-  return baghdad.toISOString().slice(0, 10)
-}
+import { todayInBaghdad } from '../utils/format'
 
 function daysAgo(n: number) {
-  const d = new Date(todayBaghdad())
+  const d = new Date(`${todayInBaghdad()}T00:00:00`)
   d.setDate(d.getDate() - n)
   return d.toISOString().slice(0, 10)
 }
@@ -22,21 +18,24 @@ interface SettingsEdit {
   referredByRestaurantId: number | null
 }
 
+/// Platform moderation: who is waiting to be let in, who is live, and the per-restaurant
+/// levers (overbooking tolerance, founding badge, featured weight, referral) that the
+/// platform — not the restaurant — controls.
 export function AdminDashboard() {
-  const { t } = useTranslation()
-  const [restaurants, setRestaurants] = useState<RestaurantAdminListItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const { t, i18n } = useTranslation()
+  const isAr = i18n.language === 'ar'
+
+  const [restaurants, setRestaurants] = useState<RestaurantAdminListItem[] | null>(null)
   const [bookingSettings, setBookingSettings] = useState<AdminRestaurantSettings[]>([])
   const [edits, setEdits] = useState<Record<number, SettingsEdit>>({})
   const [savingId, setSavingId] = useState<number | null>(null)
-  const [platformStats, setPlatformStats] = useState<PlatformBookingStats | null>(null)
+  const [stats, setStats] = useState<PlatformBookingStats | null>(null)
 
   const load = () => {
-    setLoading(true)
     api
       .get<RestaurantAdminListItem[]>('/admin/restaurants')
       .then((res) => setRestaurants(res.data))
-      .finally(() => setLoading(false))
+      .catch(() => setRestaurants([]))
   }
 
   const loadBookingSettings = () => {
@@ -62,8 +61,9 @@ export function AdminDashboard() {
   useEffect(loadBookingSettings, [])
   useEffect(() => {
     api
-      .get<PlatformBookingStats>('/admin/bookings/stats', { params: { start: daysAgo(29), end: todayBaghdad() } })
-      .then((res) => setPlatformStats(res.data))
+      .get<PlatformBookingStats>('/admin/bookings/stats', { params: { start: daysAgo(29), end: todayInBaghdad() } })
+      .then((res) => setStats(res.data))
+      .catch(() => setStats(null))
   }, [])
 
   const saveSettings = async (restaurantId: number) => {
@@ -83,199 +83,207 @@ export function AdminDashboard() {
     load()
   }
 
-  if (loading) return <p className="state-message">{t('common.loading')}</p>
+  const statusKind = (status: string) =>
+    status === 'Approved' ? 'good' : status === 'Pending' ? 'warn' : 'bad'
 
-  const pending = restaurants.filter((r) => r.status === 'Pending')
+  const pending = restaurants?.filter((r) => r.status === 'Pending') ?? []
 
   return (
-    <div className="container">
-      <h1>{t('admin.title')}</h1>
-
-      <div className="dashboard-section-header">
-        <h2>{t('admin.pending')}</h2>
+    <div className="container section-tight stack stack-6">
+      <div className="section-head">
+        <div>
+          <h1 style={{ fontSize: '1.5rem' }}>{t('admin.title')}</h1>
+          <p>{t('admin.all')}</p>
+        </div>
       </div>
 
-      {pending.length === 0 && <p className="state-message">{t('admin.noPending')}</p>}
-
-      {pending.length > 0 && (
-        <div className="admin-table-wrap" style={{ marginBottom: '1.5rem' }}>
-          <table className="admin-table">
-            <tbody>
-              {pending.map((r) => (
-                <tr key={r.id}>
-                  <td>
-                    <strong>{r.name}</strong>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{r.nameAr}</div>
-                  </td>
-                  <td>{r.areaNameEn}</td>
-                  <td>{r.phoneNumber}</td>
-                  <td>
-                    {r.offeringCount} {t('admin.offerings')}
-                  </td>
-                  <td>
-                    <div className="table-actions">
-                      <button className="btn small" onClick={() => act(r.id, 'approve')}>
-                        {t('admin.approve')}
-                      </button>
-                      <button className="btn small danger" onClick={() => act(r.id, 'reject')}>
-                        {t('admin.reject')}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {stats && (
+        <div className="stat-grid">
+          <div className="stat">
+            <div className="value nums">{stats.totalBookings}</div>
+            <div className="label">{t('admin.statsTitle')}</div>
+          </div>
+          <div className="stat">
+            <div className="value nums">{stats.totalPartySize}</div>
+            <div className="label">{t('admin.totalGuests')}</div>
+          </div>
+          <div className="stat">
+            <div className="value nums">{stats.restaurantsWithBookings}</div>
+            <div className="label">{t('admin.activeRestaurants')}</div>
+          </div>
         </div>
       )}
 
-      <div className="dashboard-section-header">
-        <h2>{t('admin.all')}</h2>
-      </div>
+      <section className="stack stack-3">
+        <div className="section-head"><h2>{t('admin.pending')}</h2></div>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>{t('auth.restaurantName')}</th>
-              <th>{t('filters.area')}</th>
-              <th>{t('auth.phone')}</th>
-              <th>{t('status.Approved')}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {restaurants.map((r) => (
-              <tr key={r.id}>
-                <td>{r.name}</td>
-                <td>{r.areaNameEn}</td>
-                <td>{r.phoneNumber}</td>
-                <td>
-                  <span className={`status-tag ${r.status}`}>{t(`status.${r.status}`)}</span>
-                </td>
-                <td>
-                  <div className="table-actions">
-                    {r.status === 'Approved' && (
-                      <button className="btn small danger" onClick={() => act(r.id, 'suspend')}>
-                        {t('admin.suspend')}
-                      </button>
-                    )}
-                    {(r.status === 'Suspended' || r.status === 'Rejected') && (
-                      <button className="btn small" onClick={() => act(r.id, 'reinstate')}>
-                        {t('admin.reinstate')}
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {!restaurants && <Skeleton height={90} radius={14} />}
 
-      {platformStats && (
-        <>
-          <div className="dashboard-section-header">
-            <h2>{t('adminBooking.statsTitle')}</h2>
-          </div>
-          <div className="analytics-cards" style={{ marginBottom: '1.5rem' }}>
-            <div className="analytics-card">
-              <span className="analytics-value">{platformStats.totalBookings}</span>
-              <span className="analytics-label">{t('bookingDashboard.totalBookings')}</span>
-            </div>
-            <div className="analytics-card">
-              <span className="analytics-value">{platformStats.totalPartySize}</span>
-              <span className="analytics-label">{t('adminBooking.totalPartySize')}</span>
-            </div>
-            <div className="analytics-card">
-              <span className="analytics-value">{platformStats.restaurantsWithBookings}</span>
-              <span className="analytics-label">{t('adminBooking.restaurantsWithBookings')}</span>
-            </div>
-          </div>
-        </>
-      )}
+        {restaurants && pending.length === 0 && (
+          <EmptyState icon="✅" title={t('admin.noPending')} />
+        )}
 
-      <div className="dashboard-section-header">
-        <h2>{t('adminBooking.settingsTitle')}</h2>
-      </div>
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>{t('auth.restaurantName')}</th>
-              <th>{t('bookingSettings.overbooking')}</th>
-              <th>{t('bookingSettings.foundingBadge')}</th>
-              <th>{t('adminBooking.featuredScore')}</th>
-              <th>{t('adminBooking.referredBy')}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookingSettings.map((s) => {
-              const edit = edits[s.restaurantId]
-              if (!edit) return null
-              return (
-                <tr key={s.restaurantId}>
-                  <td>{s.restaurantName}</td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      style={{ width: 70 }}
-                      value={edit.overbookingTolerancePercent}
-                      onChange={(e) =>
-                        setEdits({ ...edits, [s.restaurantId]: { ...edit, overbookingTolerancePercent: Number(e.target.value) } })
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={edit.isFoundingRestaurant}
-                      onChange={(e) => setEdits({ ...edits, [s.restaurantId]: { ...edit, isFoundingRestaurant: e.target.checked } })}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      style={{ width: 70 }}
-                      value={edit.featuredScore}
-                      onChange={(e) => setEdits({ ...edits, [s.restaurantId]: { ...edit, featuredScore: Number(e.target.value) } })}
-                    />
-                  </td>
-                  <td>
-                    <select
-                      value={edit.referredByRestaurantId ?? ''}
-                      onChange={(e) =>
-                        setEdits({
-                          ...edits,
-                          [s.restaurantId]: { ...edit, referredByRestaurantId: e.target.value === '' ? null : Number(e.target.value) },
-                        })
-                      }
-                    >
-                      <option value="">—</option>
-                      {bookingSettings
-                        .filter((other) => other.restaurantId !== s.restaurantId)
-                        .map((other) => (
-                          <option key={other.restaurantId} value={other.restaurantId}>
-                            {other.restaurantName}
-                          </option>
-                        ))}
-                    </select>
-                  </td>
-                  <td>
-                    <button className="btn small" disabled={savingId === s.restaurantId} onClick={() => saveSettings(s.restaurantId)}>
-                      {t('dashboard.save')}
-                    </button>
-                  </td>
+        {pending.length > 0 && (
+          <div className="table-wrap">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>{t('auth.restaurantName')}</th>
+                  <th>{t('auth.area')}</th>
+                  <th>{t('auth.phone')}</th>
+                  <th>{t('admin.services')}</th>
+                  <th />
                 </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {pending.map((r) => (
+                  <tr key={r.id}>
+                    <td>
+                      <strong>{isAr ? r.nameAr : r.name}</strong>
+                    </td>
+                    <td>{r.areaNameEn}</td>
+                    <td className="nums">{r.phoneNumber}</td>
+                    <td className="nums">{r.serviceCount}</td>
+                    <td>
+                      <div className="row" style={{ gap: 'var(--sp-2)' }}>
+                        <button className="btn sm" onClick={() => act(r.id, 'approve')}>{t('admin.approve')}</button>
+                        <button className="btn quiet-danger sm" onClick={() => act(r.id, 'reject')}>{t('admin.reject')}</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="stack stack-3">
+        <div className="section-head"><h2>{t('admin.all')}</h2></div>
+
+        {!restaurants && <Skeleton height={220} radius={14} />}
+
+        {restaurants && restaurants.length > 0 && (
+          <div className="table-wrap">
+            <table className="data">
+              <thead>
+                <tr>
+                  <th>{t('auth.restaurantName')}</th>
+                  <th>{t('auth.area')}</th>
+                  <th>{t('auth.phone')}</th>
+                  <th>{t('bookingsAdmin.status')}</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {restaurants.map((r) => (
+                  <tr key={r.id}>
+                    <td>{isAr ? r.nameAr : r.name}</td>
+                    <td>{r.areaNameEn}</td>
+                    <td className="nums">{r.phoneNumber}</td>
+                    <td>
+                      <Badge kind={statusKind(r.status)}>{t(`status.${r.status}`)}</Badge>
+                    </td>
+                    <td>
+                      <div className="row" style={{ gap: 'var(--sp-2)' }}>
+                        {r.status === 'Approved' && (
+                          <button className="btn quiet-danger sm" onClick={() => act(r.id, 'suspend')}>{t('admin.suspend')}</button>
+                        )}
+                        {(r.status === 'Suspended' || r.status === 'Rejected') && (
+                          <button className="btn secondary sm" onClick={() => act(r.id, 'reinstate')}>{t('admin.reinstate')}</button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="stack stack-3">
+        <div className="section-head"><h2>{t('admin.settingsTitle')}</h2></div>
+
+        <div className="table-wrap">
+          <table className="data">
+            <thead>
+              <tr>
+                <th>{t('auth.restaurantName')}</th>
+                <th>{t('admin.overbooking')}</th>
+                <th>{t('admin.founding')}</th>
+                <th>{t('admin.featuredScore')}</th>
+                <th>{t('admin.referredBy')}</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {bookingSettings.map((s) => {
+                const edit = edits[s.restaurantId]
+                if (!edit) return null
+                return (
+                  <tr key={s.restaurantId}>
+                    <td>{s.restaurantName}</td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        style={{ width: 76 }}
+                        value={edit.overbookingTolerancePercent}
+                        onChange={(e) =>
+                          setEdits({ ...edits, [s.restaurantId]: { ...edit, overbookingTolerancePercent: Number(e.target.value) } })
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={edit.isFoundingRestaurant}
+                        onChange={(e) => setEdits({ ...edits, [s.restaurantId]: { ...edit, isFoundingRestaurant: e.target.checked } })}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        min={0}
+                        style={{ width: 76 }}
+                        value={edit.featuredScore}
+                        onChange={(e) => setEdits({ ...edits, [s.restaurantId]: { ...edit, featuredScore: Number(e.target.value) } })}
+                      />
+                    </td>
+                    <td>
+                      <select
+                        value={edit.referredByRestaurantId ?? ''}
+                        onChange={(e) =>
+                          setEdits({
+                            ...edits,
+                            [s.restaurantId]: { ...edit, referredByRestaurantId: e.target.value === '' ? null : Number(e.target.value) },
+                          })
+                        }
+                      >
+                        <option value="">{t('common.none')}</option>
+                        {bookingSettings
+                          .filter((other) => other.restaurantId !== s.restaurantId)
+                          .map((other) => (
+                            <option key={other.restaurantId} value={other.restaurantId}>
+                              {other.restaurantName}
+                            </option>
+                          ))}
+                      </select>
+                    </td>
+                    <td>
+                      <button className="btn sm" disabled={savingId === s.restaurantId} onClick={() => saveSettings(s.restaurantId)}>
+                        {t('common.save')}
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   )
 }

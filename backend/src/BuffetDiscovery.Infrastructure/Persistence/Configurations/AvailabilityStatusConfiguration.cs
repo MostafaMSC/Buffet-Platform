@@ -8,12 +8,12 @@ public class AvailabilityStatusConfiguration : IEntityTypeConfiguration<Availabi
 {
     public void Configure(EntityTypeBuilder<AvailabilityStatus> builder)
     {
-        builder.HasOne(a => a.Offering)
+        builder.HasOne(a => a.Service)
             .WithMany(o => o.AvailabilityStatuses)
-            .HasForeignKey(a => a.OfferingId)
+            .HasForeignKey(a => a.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(a => new { a.OfferingId, a.Date }).IsUnique();
+        builder.HasIndex(a => new { a.ServiceId, a.Date }).IsUnique();
         builder.HasIndex(a => new { a.Date, a.IsActive });
     }
 }

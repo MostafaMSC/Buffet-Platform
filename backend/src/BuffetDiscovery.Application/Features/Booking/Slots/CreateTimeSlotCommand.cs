@@ -6,7 +6,7 @@ using MediatR;
 
 namespace BuffetDiscovery.Application.Features.Booking.Slots;
 
-public record CreateTimeSlotCommand(int OfferingId, string StartTime, string EndTime, int Capacity, int BufferMinutes) : IRequest<int>;
+public record CreateTimeSlotCommand(int ServiceId, string StartTime, string EndTime, int Capacity, int BufferMinutes) : IRequest<int>;
 
 public class CreateTimeSlotCommandValidator : AbstractValidator<CreateTimeSlotCommand>
 {
@@ -22,7 +22,7 @@ public class CreateTimeSlotCommandValidator : AbstractValidator<CreateTimeSlotCo
 }
 
 public class CreateTimeSlotCommandHandler(
-    IOfferingRepository offerings,
+    IServiceRepository services,
     ITimeSlotRepository timeSlots,
     ICurrentUserService currentUser,
     IUnitOfWork unitOfWork) : IRequestHandler<CreateTimeSlotCommand, int>
@@ -30,13 +30,13 @@ public class CreateTimeSlotCommandHandler(
     public async Task<int> Handle(CreateTimeSlotCommand request, CancellationToken ct)
     {
         var restaurantId = currentUser.RestaurantId ?? throw new UnauthorizedException("No restaurant associated with this account.");
-        var offering = await offerings.GetByIdForRestaurantAsync(request.OfferingId, restaurantId, ct)
-            ?? throw new NotFoundException("Offering not found.");
+        var service = await services.GetByIdForRestaurantAsync(request.ServiceId, restaurantId, ct)
+            ?? throw new NotFoundException("Service not found.");
 
         var start = TimeOnly.Parse(request.StartTime);
         var end = TimeOnly.Parse(request.EndTime);
 
-        var existing = await timeSlots.GetByOfferingAsync(offering.Id, ct);
+        var existing = await timeSlots.GetByServiceAsync(service.Id, ct);
         if (existing.Any(s => start < s.EndTime && s.StartTime < end))
         {
             throw new ConflictException("This slot overlaps with an existing one.");
@@ -44,7 +44,7 @@ public class CreateTimeSlotCommandHandler(
 
         var slot = new TimeSlot
         {
-            OfferingId = offering.Id,
+            ServiceId = service.Id,
             StartTime = start,
             EndTime = end,
             Capacity = request.Capacity,
@@ -52,8 +52,8 @@ public class CreateTimeSlotCommandHandler(
         };
         timeSlots.Add(slot);
 
-        // An offering is in exactly one mode: whole-window OR slots, never both.
-        offering.Capacity = null;
+        // An service is in exactly one mode: whole-window OR slots, never both.
+        service.Capacity = null;
 
         await unitOfWork.SaveChangesAsync(ct);
         return slot.Id;

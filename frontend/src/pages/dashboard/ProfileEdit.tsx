@@ -3,28 +3,27 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
 import { PhotoUploader } from '../../components/PhotoUploader'
-import type { Area, RestaurantProfile } from '../../types'
+import { AreaSelect } from '../../components/AreaSelect'
+import { Skeleton } from '../../components/ui'
+import type { RestaurantProfile } from '../../types'
 
+/// The venue behind the services: how it is named, where it is, and how a guest reaches it.
 export function ProfileEdit() {
-  const { t, i18n } = useTranslation()
-  const isAr = i18n.language === 'ar'
+  const { t } = useTranslation()
   const navigate = useNavigate()
-
-  const [areas, setAreas] = useState<Area[]>([])
   const [form, setForm] = useState<RestaurantProfile | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    Promise.all([api.get<Area[]>('/areas'), api.get<RestaurantProfile>('/dashboard/profile')]).then(
-      ([areasRes, profileRes]) => {
-        setAreas(areasRes.data)
+    api.get<RestaurantProfile>('/dashboard/profile').then(
+      (profileRes) => {
         setForm(profileRes.data)
       },
     )
   }, [])
 
-  if (!form) return <p className="state-message">{t('common.loading')}</p>
+  if (!form) return <Skeleton height={480} radius={14} />
 
   const update = <K extends keyof RestaurantProfile>(key: K, value: RestaurantProfile[K]) =>
     setForm((prev) => (prev ? { ...prev, [key]: value } : prev))
@@ -55,100 +54,99 @@ export function ProfileEdit() {
   }
 
   return (
-    <div className="container">
-      <form className="form-card" onSubmit={handleSubmit} style={{ maxWidth: 560 }}>
-        <h1>{t('dashboard.editProfile')}</h1>
-        {error && <div className="form-error">{t('common.error')}</div>}
+    <div className="stack stack-5">
+      <div className="section-head">
+        <div><h1 style={{ fontSize: '1.5rem' }}>{t('dashboard.editProfile')}</h1></div>
+      </div>
 
-        <div className="form-row">
-          <div className="form-field">
-            <label>{t('profileForm.name')}</label>
+      {error && <div className="alert bad">{t('common.error')}</div>}
+
+      <form className="card card-pad stack stack-4" onSubmit={handleSubmit} style={{ maxWidth: 620 }}>
+        <div className="row wrap" style={{ gap: 'var(--sp-3)' }}>
+          <label className="field grow" style={{ minWidth: 220 }}>
+            <span>{t('profileForm.name')}</span>
             <input required value={form.name} onChange={(e) => update('name', e.target.value)} />
-          </div>
-          <div className="form-field">
-            <label>{t('profileForm.nameAr')}</label>
+          </label>
+          <label className="field grow" style={{ minWidth: 220 }}>
+            <span>{t('profileForm.nameAr')}</span>
             <input
               required
               dir="rtl"
               value={form.nameAr}
               onChange={(e) => update('nameAr', e.target.value)}
             />
-          </div>
+          </label>
         </div>
 
-        <div className="form-field">
-          <label>{t('profileForm.area')}</label>
-          <select required value={form.areaId} onChange={(e) => update('areaId', Number(e.target.value))}>
-            {areas.map((a) => (
-              <option key={a.id} value={a.id}>
-                {isAr ? a.nameAr : a.nameEn}
-              </option>
-            ))}
-          </select>
-        </div>
+        <label className="field">
+          <span>{t('profileForm.area')}</span>
+          <AreaSelect required value={form.areaId} onChange={(id) => update('areaId', id)} />
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.phone')}</label>
+        <label className="field">
+          <span>{t('profileForm.phone')}</span>
           <input
             required
             value={form.phoneNumber}
             onChange={(e) => update('phoneNumber', e.target.value)}
           />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.address')}</label>
+        <label className="field">
+          <span>{t('profileForm.address')}</span>
           <input value={form.address ?? ''} onChange={(e) => update('address', e.target.value)} />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.googleMapsUrl')}</label>
+        <label className="field">
+          <span>{t('profileForm.googleMapsUrl')}</span>
           <input
             value={form.googleMapsUrl ?? ''}
             onChange={(e) => update('googleMapsUrl', e.target.value)}
           />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.description')}</label>
+        <label className="field">
+          <span>{t('profileForm.description')}</span>
           <textarea
             rows={2}
             value={form.description ?? ''}
             onChange={(e) => update('description', e.target.value)}
           />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.descriptionAr')}</label>
+        <label className="field">
+          <span>{t('profileForm.descriptionAr')}</span>
           <textarea
             rows={2}
             dir="rtl"
             value={form.descriptionAr ?? ''}
             onChange={(e) => update('descriptionAr', e.target.value)}
           />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.logo')}</label>
+        <label className="field">
+          <span>{t('profileForm.logo')}</span>
           <PhotoUploader
             urls={form.logoUrl ? [form.logoUrl] : []}
             maxPhotos={1}
             onChange={(urls) => update('logoUrl', urls[0] ?? null)}
           />
-        </div>
+        </label>
 
-        <div className="form-field">
-          <label>{t('profileForm.cover')}</label>
+        <label className="field">
+          <span>{t('profileForm.cover')}</span>
           <PhotoUploader
             urls={form.coverPhotoUrl ? [form.coverPhotoUrl] : []}
             maxPhotos={1}
             onChange={(urls) => update('coverPhotoUrl', urls[0] ?? null)}
           />
-        </div>
+        </label>
 
-        <button className="btn" type="submit" disabled={saving}>
-          {t('dashboard.save')}
-        </button>
+        <div>
+          <button className="btn" type="submit" disabled={saving}>
+            {saving ? t('common.loading') : t('common.save')}
+          </button>
+        </div>
       </form>
     </div>
   )

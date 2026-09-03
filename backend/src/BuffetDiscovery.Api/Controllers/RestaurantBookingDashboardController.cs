@@ -7,18 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BuffetDiscovery.Api.Controllers;
 
-/// The restaurant's day-to-day booking dashboard: see who's booked, mark no-shows/completed,
-/// and view booking analytics. Distinct from RestaurantBookingSetupController (capacity/slot
-/// configuration, done once) — this is the recurring, day-of-service workflow.
+/// Day-to-day booking operations: the overview tiles, the booking list, status actions and
+/// analytics. Separate from RestaurantDashboardController, which is about configuring
+/// services rather than running service.
 [ApiController]
 [Route("api/dashboard/bookings")]
 [Authorize(Roles = "RestaurantOwner")]
 public class RestaurantBookingDashboardController(ISender mediator) : ControllerBase
 {
-    [HttpGet]
-    public async Task<ActionResult<List<RestaurantBookingGroupDto>>> GetBookings([FromQuery] DateOnly? date, CancellationToken ct)
+    [HttpGet("overview")]
+    public async Task<ActionResult<DashboardOverviewDto>> Overview(CancellationToken ct)
     {
-        return Ok(await mediator.Send(new GetRestaurantBookingsQuery(date), ct));
+        return Ok(await mediator.Send(new GetDashboardOverviewQuery(), ct));
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<RestaurantBookingGroupDto>>> GetBookings(
+        [FromQuery] DateOnly? date, [FromQuery] BookingStatus? status, CancellationToken ct)
+    {
+        return Ok(await mediator.Send(new GetRestaurantBookingsQuery(date, status), ct));
     }
 
     [HttpPatch("{id:int}/status")]
@@ -29,7 +36,8 @@ public class RestaurantBookingDashboardController(ISender mediator) : Controller
     }
 
     [HttpGet("analytics")]
-    public async Task<ActionResult<BookingAnalyticsDto>> GetAnalytics([FromQuery] DateOnly start, [FromQuery] DateOnly end, CancellationToken ct)
+    public async Task<ActionResult<BookingAnalyticsDto>> GetAnalytics(
+        [FromQuery] DateOnly start, [FromQuery] DateOnly end, CancellationToken ct)
     {
         return Ok(await mediator.Send(new GetBookingAnalyticsQuery(start, end), ct));
     }

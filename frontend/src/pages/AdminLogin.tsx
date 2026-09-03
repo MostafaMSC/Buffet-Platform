@@ -34,30 +34,24 @@ export function AdminLogin() {
   }
 
   return (
-    <div className="container">
-      <form className="form-card" onSubmit={handleSubmit}>
-        <h1>{t('auth.adminLoginTitle')}</h1>
-        {error && <div className="form-error">{t('auth.error')}</div>}
-        <div className="form-field">
-          <label>{t('auth.phone')}</label>
-          <input
-            type="tel"
-            required
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-        </div>
-        <div className="form-field">
-          <label>{t('auth.password')}</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <button className="btn" type="submit" disabled={submitting}>
-          {t('auth.login')}
+    <div className="container section auth-shell">
+      <form className="card card-pad stack stack-4 auth-card" onSubmit={handleSubmit}>
+        <h1 style={{ fontSize: '1.5rem' }}>{t('auth.adminLoginTitle')}</h1>
+
+        {error && <div className="alert bad">{t('auth.error')}</div>}
+
+        <label className="field">
+          <span>{t('auth.phone')}</span>
+          <input type="tel" required autoComplete="username" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+        </label>
+
+        <label className="field">
+          <span>{t('auth.password')}</span>
+          <input type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
+
+        <button className="btn lg" type="submit" disabled={submitting}>
+          {submitting ? t('common.loading') : t('auth.login')}
         </button>
       </form>
     </div>

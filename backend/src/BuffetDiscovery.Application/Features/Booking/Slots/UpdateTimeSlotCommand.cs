@@ -38,7 +38,7 @@ public class UpdateTimeSlotCommandHandler(
         var start = TimeOnly.Parse(request.StartTime);
         var end = TimeOnly.Parse(request.EndTime);
 
-        var siblings = await timeSlots.GetByOfferingAsync(slot.OfferingId, ct);
+        var siblings = await timeSlots.GetByServiceAsync(slot.ServiceId, ct);
         if (siblings.Any(s => s.Id != slot.Id && start < s.EndTime && s.StartTime < end))
         {
             throw new ConflictException("This slot overlaps with an existing one.");

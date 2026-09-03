@@ -39,7 +39,7 @@ public record RestaurantAdminListItemDto(
     string PhoneNumber,
     RestaurantStatus Status,
     DateTime CreatedAt,
-    int OfferingCount
+    int ServiceCount
 );
 
 public record AuthResponseDto(string Token, string Role, int? RestaurantId, RestaurantStatus? RestaurantStatus);

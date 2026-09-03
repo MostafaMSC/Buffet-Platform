@@ -1,17 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api/client'
 import { useAuth } from '../context/AuthContext'
-import type { Area, AuthResponse } from '../types'
+import { AreaSelect } from '../components/AreaSelect'
+import type { AuthResponse } from '../types'
 
 export function RestaurantSignup() {
-  const { t, i18n } = useTranslation()
-  const isAr = i18n.language === 'ar'
+  const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
-
-  const [areas, setAreas] = useState<Area[]>([])
   const [phoneNumber, setPhoneNumber] = useState('')
   const [password, setPassword] = useState('')
   const [restaurantName, setRestaurantName] = useState('')
@@ -19,10 +17,6 @@ export function RestaurantSignup() {
   const [areaId, setAreaId] = useState<number | ''>('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-
-  useEffect(() => {
-    api.get<Area[]>('/areas').then((res) => setAreas(res.data))
-  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,57 +44,54 @@ export function RestaurantSignup() {
   }
 
   return (
-    <div className="container">
-      <form className="form-card" onSubmit={handleSubmit}>
-        <h1>{t('auth.signupTitle')}</h1>
-        <p className="subtitle">{t('auth.signupSubtitle')}</p>
-        {error && <div className="form-error">{error}</div>}
+    <div className="container section auth-shell">
+      <form className="card card-pad stack stack-4 auth-card" onSubmit={handleSubmit}>
+        <div className="stack stack-1">
+          <h1 style={{ fontSize: '1.5rem' }}>{t('auth.signupTitle')}</h1>
+          <p className="small soft">{t('auth.signupSubtitle')}</p>
+        </div>
 
-        <div className="form-field">
-          <label>{t('auth.restaurantName')}</label>
+        {error && <div className="alert bad">{error}</div>}
+
+        <label className="field">
+          <span>{t('auth.restaurantName')}</span>
           <input required value={restaurantName} onChange={(e) => setRestaurantName(e.target.value)} />
-        </div>
-        <div className="form-field">
-          <label>{t('auth.restaurantNameAr')}</label>
-          <input
-            required
-            dir="rtl"
-            value={restaurantNameAr}
-            onChange={(e) => setRestaurantNameAr(e.target.value)}
-          />
-        </div>
-        <div className="form-field">
-          <label>{t('auth.area')}</label>
-          <select required value={areaId} onChange={(e) => setAreaId(Number(e.target.value))}>
-            <option value="">—</option>
-            {areas.map((a) => (
-              <option key={a.id} value={a.id}>
-                {isAr ? a.nameAr : a.nameEn}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-field">
-          <label>{t('auth.phone')}</label>
-          <input type="tel" required value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
-        </div>
-        <div className="form-field">
-          <label>{t('auth.password')}</label>
+        </label>
+
+        <label className="field">
+          <span>{t('auth.restaurantNameAr')}</span>
+          <input required dir="rtl" value={restaurantNameAr} onChange={(e) => setRestaurantNameAr(e.target.value)} />
+        </label>
+
+        <label className="field">
+          <span>{t('auth.area')}</span>
+          <AreaSelect required value={areaId} onChange={setAreaId} />
+        </label>
+
+        <label className="field">
+          <span>{t('auth.phone')}</span>
+          <input type="tel" required autoComplete="username" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+        </label>
+
+        <label className="field">
+          <span>{t('auth.password')}</span>
           <input
             type="password"
             required
             minLength={6}
+            autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
+        </label>
 
-        <button className="btn" type="submit" disabled={submitting}>
-          {t('auth.signup')}
+        <button className="btn lg" type="submit" disabled={submitting}>
+          {submitting ? t('common.loading') : t('auth.signup')}
         </button>
-        <div className="form-footer">
+
+        <p className="small muted" style={{ textAlign: 'center' }}>
           <Link to="/restaurant/login">{t('auth.alreadyHaveAccount')}</Link>
-        </div>
+        </p>
       </form>
     </div>
   )

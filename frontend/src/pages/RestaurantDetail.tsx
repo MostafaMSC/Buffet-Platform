@@ -1,154 +1,96 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
-import { api } from '../api/client'
-import { BookingWidget } from '../components/BookingWidget'
-import type { RestaurantDetail as RestaurantDetailType } from '../types'
-import { getVideoEmbedUrl, isDirectVideoFile } from '../utils/video'
+import { useParams } from 'react-router-dom'
+import { getRestaurant } from '../api/endpoints'
+import { ServiceCard } from '../components/ServiceCard'
+import { EmptyState, RatingInline, Skeleton, Stars } from '../components/ui'
+import type { RestaurantPage } from '../types'
 
+/// A restaurant's own page: the venue, then everything it currently offers as normal
+/// bookable cards, so the route into a booking is the same as from search.
 export function RestaurantDetail() {
   const { id } = useParams()
   const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
-  const [restaurant, setRestaurant] = useState<RestaurantDetailType | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [notFound, setNotFound] = useState(false)
+
+  const [page, setPage] = useState<RestaurantPage | null>(null)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    setNotFound(false)
-    api
-      .get<RestaurantDetailType>(`/restaurants/${id}`)
-      .then((res) => setRestaurant(res.data))
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false))
+    getRestaurant(Number(id)).then(setPage).catch(() => setFailed(true))
   }, [id])
 
-  if (loading) return <p className="state-message">{t('common.loading')}</p>
-  if (notFound || !restaurant) return <p className="state-message">{t('results.noResults')}</p>
+  if (failed) return <div className="container section"><EmptyState icon="🔎" title={t('common.error')} /></div>
+  if (!page) return <div className="container section"><Skeleton height={260} radius={20} /></div>
 
-  const name = isAr ? restaurant.nameAr : restaurant.name
-  const areaName = isAr ? restaurant.areaNameAr : restaurant.areaNameEn
-  const description = isAr ? restaurant.descriptionAr : restaurant.description
+  const r = page.restaurant
+  const name = isAr ? r.nameAr : r.name
+  const description = isAr ? r.descriptionAr : r.description
 
   return (
-    <div className="container">
-      <Link to="/" className="nav-link" style={{ display: 'inline-block', marginBottom: '0.75rem' }}>
-        ← {t('detail.back')}
-      </Link>
+    <>
+      {r.coverPhotoUrl && (
+        <div className="container" style={{ paddingTop: 'var(--sp-4)' }}>
+          <img
+            src={r.coverPhotoUrl}
+            alt=""
+            style={{ width: '100%', aspectRatio: '21 / 8', objectFit: 'cover', borderRadius: 'var(--r-lg)' }}
+          />
+        </div>
+      )}
 
-      <div className="detail-cover">
-        {restaurant.coverPhotoUrl && <img src={restaurant.coverPhotoUrl} alt={name} />}
-      </div>
-
-      <div className="detail-header">
-        <h1>{name}</h1>
-        {restaurant.isFoundingRestaurant && <span className="badge accent">{t('foundingBadgeLong')}</span>}
-        <div className="area">{areaName}</div>
-        {restaurant.address && (
-          <div className="area" style={{ marginTop: '-0.5rem' }}>
-            {restaurant.address}
+      <div className="container section-tight stack stack-6">
+        <div className="stack stack-3">
+          <h1>{name}</h1>
+          <div className="row wrap small soft" style={{ gap: 'var(--sp-3)' }}>
+            <RatingInline rating={r.rating} reviewCount={r.reviewCount} />
+            <span>·</span>
+            <span>{isAr ? r.areaNameAr : r.areaName}, {isAr ? r.cityNameAr : r.cityName}</span>
           </div>
-        )}
-      </div>
+          {description && <p className="soft" style={{ maxWidth: '68ch' }}>{description}</p>}
 
-      {description && <p>{description}</p>}
-
-      <div className="action-row">
-        <a className="action-btn primary" href={`tel:${restaurant.phoneNumber}`}>
-          📞 {t('detail.call')}
-        </a>
-        {restaurant.googleMapsUrl && (
-          <a className="action-btn" href={restaurant.googleMapsUrl} target="_blank" rel="noreferrer">
-            📍 {t('detail.directions')}
-          </a>
-        )}
-      </div>
-
-      {restaurant.offerings.map((o) => {
-        const desc = isAr ? o.descriptionAr : o.description
-        return (
-          <div className="offering-block" key={o.id}>
-            <div className="offering-block-header">
-              <span className="badge">{t(`mealType.${o.mealType}`)}</span>
-              <span className={`status-pill ${o.isActiveToday ? 'on' : 'off'}`}>
-                {o.isActiveToday ? t('detail.activeToday') : t('detail.notActiveToday')}
-              </span>
-            </div>
-            <div className="offering-card-meta">
-              <span>
-                {t('detail.hours')}: {o.opensAt}–{o.closesAt}
-              </span>
-              <span className="offering-card-price">
-                {t('detail.price')}: {o.price.toLocaleString()} {t('results.iqd')}
-              </span>
-            </div>
-            {desc && <p>{desc}</p>}
-            {o.videoUrl && <OfferingVideo url={o.videoUrl} label={t('detail.watchVideo')} />}
-            {o.photoUrls.length > 0 && (
-              <div className="offering-photos">
-                {o.photoUrls.map((url) => (
-                  <img key={url} src={url} alt="" loading="lazy" />
-                ))}
-              </div>
+          <div className="row wrap" style={{ gap: 'var(--sp-2)' }}>
+            <a className="btn secondary sm" href={`tel:${r.phoneNumber}`}>{t('detail.call')}</a>
+            {r.googleMapsUrl && (
+              <a className="btn secondary sm" href={r.googleMapsUrl} target="_blank" rel="noreferrer">{t('detail.directions')}</a>
             )}
-            <BookingWidget offeringId={o.id} />
           </div>
-        )
-      })}
-    </div>
-  )
-}
 
-function OfferingVideo({ url, label }: { url: string; label: string }) {
-  if (isDirectVideoFile(url)) {
-    return (
-      <div className="video-embed">
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-        <video src={url} controls playsInline preload="metadata" />
+          {r.features.length > 0 && (
+            <div className="pill-row">
+              {r.features.map((f) => <span key={f} className="chip sm">{t(`feature.${f}`)}</span>)}
+            </div>
+          )}
+        </div>
+
+        <section>
+          <div className="section-head"><h2>{t('search.resultsTitle')}</h2></div>
+          {page.services.length === 0 ? (
+            <EmptyState icon="🍽️" title={t('search.noResultsTitle')} />
+          ) : (
+            <div className="card-grid">
+              {page.services.map((card) => <ServiceCard key={card.serviceId} card={card} />)}
+            </div>
+          )}
+        </section>
+
+        {page.reviews.length > 0 && (
+          <section>
+            <div className="section-head"><h2>{t('rating.guestReviews')}</h2></div>
+            <div className="card card-pad">
+              {page.reviews.map((review) => (
+                <div className="review" key={review.id}>
+                  <div className="row-between">
+                    <strong className="small">{review.customerName}</strong>
+                    <span style={{ color: 'var(--c-brand)' }}><Stars rating={review.rating} size={13} /></span>
+                  </div>
+                  {review.comment && <p className="small soft" style={{ marginTop: 4 }}>{review.comment}</p>}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
-    )
-  }
-
-  const embedUrl = getVideoEmbedUrl(url)
-
-  if (!embedUrl) {
-    return (
-      <a
-        className="action-btn"
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        style={{ marginTop: '0.5rem', display: 'inline-flex' }}
-      >
-        ▶ {label}
-      </a>
-    )
-  }
-
-  return (
-    <div>
-      <div className="video-embed">
-        <iframe
-          src={embedUrl}
-          title={label}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-        />
-      </div>
-      {/* Some videos (private, or posted from a personal profile rather than a Page)
-          refuse to embed and show Facebook's own "Video Unavailable" message inside the
-          iframe — we can't detect that from the parent page (cross-origin), so always
-          offer a link that's guaranteed to work as a fallback. */}
-      <a
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', display: 'inline-block', marginTop: '0.35rem' }}
-      >
-        {label} ↗
-      </a>
-    </div>
+    </>
   )
 }

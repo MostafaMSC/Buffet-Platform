@@ -1,11 +1,12 @@
+using BuffetDiscovery.Application.Common;
 using BuffetDiscovery.Application.Common.Dtos;
 using BuffetDiscovery.Application.Common.Interfaces;
 using MediatR;
 
 namespace BuffetDiscovery.Application.Features.Booking.Customer;
 
-/// Phone-number lookup: lists every booking and waitlist entry a customer has made, across
-/// all restaurants, without requiring an account (see Phase 2 clarifying answer #1).
+/// Phone-number lookup: every booking and waitlist entry a customer has made, across all
+/// restaurants, without requiring an account.
 public record GetMyBookingsQuery(string Phone) : IRequest<MyLookupResultDto>;
 
 public class GetMyBookingsQueryHandler(
@@ -15,44 +16,41 @@ public class GetMyBookingsQueryHandler(
 {
     public async Task<MyLookupResultDto> Handle(GetMyBookingsQuery request, CancellationToken ct)
     {
-        var bookings = await bookingRepo.GetByPhoneAsync(request.Phone, ct);
-        var waitlistEntries = await waitlistRepo.GetByPhoneAsync(request.Phone, ct);
+        var phone = request.Phone.Trim();
+        var bookings = await bookingRepo.GetByPhoneAsync(phone, ct);
+        var waitlistEntries = await waitlistRepo.GetByPhoneAsync(phone, ct);
 
-        var offerWindowByRestaurant = new Dictionary<int, int>();
-        async Task<int> GetOfferWindowAsync(int restaurantId)
+        var settingsCache = new Dictionary<int, Domain.Entities.RestaurantSettings>();
+        async Task<Domain.Entities.RestaurantSettings> SettingsFor(int restaurantId)
         {
-            if (!offerWindowByRestaurant.TryGetValue(restaurantId, out var minutes))
+            if (!settingsCache.TryGetValue(restaurantId, out var settings))
             {
-                minutes = (await settingsRepo.GetOrCreateAsync(restaurantId, ct)).WaitlistOfferWindowMinutes;
-                offerWindowByRestaurant[restaurantId] = minutes;
+                settings = await settingsRepo.GetOrCreateAsync(restaurantId, ct);
+                settingsCache[restaurantId] = settings;
             }
-            return minutes;
+            return settings;
         }
 
-        var bookingDtos = bookings.Select(b =>
+        var bookingDtos = new List<BookingDetailDto>();
+        foreach (var b in bookings)
         {
-            var offering = b.Offering!;
-            var restaurant = offering.Restaurant!;
-            return new BookingDetailDto(
-                b.Id, b.ConfirmationCode, restaurant.Id, restaurant.Name, restaurant.NameAr,
-                offering.Id, offering.MealType, b.Date,
-                b.TimeSlot?.StartTime.ToString("HH:mm"), b.TimeSlot?.EndTime.ToString("HH:mm"),
-                b.CustomerName, b.CustomerPhone, b.PartySize, b.Status, b.CreatedAt
-            );
-        }).ToList();
+            var settings = await SettingsFor(b.Service!.RestaurantId);
+            bookingDtos.Add(BookingMapper.ToDetail(b, settings.CancellationCutoffMinutes));
+        }
 
         var waitlistDtos = new List<WaitlistDetailDto>();
         foreach (var w in waitlistEntries)
         {
-            var offering = w.Offering!;
-            var restaurant = offering.Restaurant!;
+            var service = w.Service!;
+            var restaurant = service.Restaurant!;
+            var settings = await SettingsFor(restaurant.Id);
+
             waitlistDtos.Add(new WaitlistDetailDto(
                 w.Id, restaurant.Id, restaurant.Name, restaurant.NameAr,
-                offering.Id, offering.MealType, w.Date,
+                service.Id, service.MealType, w.Date,
                 w.TimeSlot?.StartTime.ToString("HH:mm"), w.TimeSlot?.EndTime.ToString("HH:mm"),
                 w.CustomerName, w.CustomerPhone, w.PartySize, w.Position, w.Status, w.NotifiedAt,
-                await GetOfferWindowAsync(restaurant.Id)
-            ));
+                settings.WaitlistOfferWindowMinutes));
         }
 
         return new MyLookupResultDto(bookingDtos, waitlistDtos);

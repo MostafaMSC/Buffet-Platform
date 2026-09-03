@@ -13,7 +13,7 @@ namespace BuffetDiscovery.Application.Features.Booking.Customer;
 /// GetBookingAvailabilityQuery. Rejecting the join when there's still room keeps the queue
 /// meaningful (no one occupies a waitlist slot they could've just booked outright).
 public record JoinWaitlistCommand(
-    int OfferingId,
+    int ServiceId,
     int? TimeSlotId,
     DateOnly Date,
     string CustomerName,
@@ -34,7 +34,7 @@ public class JoinWaitlistCommandValidator : AbstractValidator<JoinWaitlistComman
 }
 
 public class JoinWaitlistCommandHandler(
-    IOfferingRepository offerings,
+    IServiceRepository services,
     ITimeSlotRepository timeSlots,
     IBookingRepository bookingRepo,
     IWaitlistRepository waitlistRepo,
@@ -45,18 +45,18 @@ public class JoinWaitlistCommandHandler(
 {
     public async Task<WaitlistDetailDto> Handle(JoinWaitlistCommand request, CancellationToken ct)
     {
-        var offering = await offerings.GetApprovedByIdAsync(request.OfferingId, ct)
-            ?? throw new NotFoundException("Offering not found.");
+        var service = await services.GetPublicByIdAsync(request.ServiceId, ct)
+            ?? throw new NotFoundException("Service not found.");
 
-        if (!RecurrenceEvaluator.MatchesRecurrence(offering, request.Date))
+        if (!RecurrenceEvaluator.MatchesRecurrence(service, request.Date))
         {
-            throw new ConflictException("This offering is not served on the selected date.");
+            throw new ConflictException("This service is not served on the selected date.");
         }
 
-        var dayStatus = await availability.GetAsync(offering.Id, request.Date, ct);
+        var dayStatus = await availability.GetAsync(service.Id, request.Date, ct);
         if (dayStatus is not null && !dayStatus.IsActive)
         {
-            throw new ConflictException("This offering is not available on the selected date.");
+            throw new ConflictException("This service is not available on the selected date.");
         }
 
         Domain.Entities.TimeSlot? slot = null;
@@ -64,7 +64,7 @@ public class JoinWaitlistCommandHandler(
         if (request.TimeSlotId.HasValue)
         {
             slot = await timeSlots.GetByIdAsync(request.TimeSlotId.Value, ct);
-            if (slot is null || slot.IsDeleted || slot.OfferingId != offering.Id)
+            if (slot is null || slot.IsDeleted || slot.ServiceId != service.Id)
             {
                 throw new NotFoundException("Time slot not found.");
             }
@@ -72,25 +72,25 @@ public class JoinWaitlistCommandHandler(
         }
         else
         {
-            capacity = offering.Capacity ?? throw new ConflictException("This offering does not accept bookings.");
+            capacity = service.Capacity ?? throw new ConflictException("This service does not accept bookings.");
         }
 
-        var settings = await settingsRepo.GetOrCreateAsync(offering.RestaurantId, ct);
+        var settings = await settingsRepo.GetOrCreateAsync(service.RestaurantId, ct);
         var effectiveCapacity = CapacityCalculator.EffectiveCapacity(capacity, settings.OverbookingTolerancePercent);
 
-        await waitlistPromoter.ExpireAndPromoteAsync(request.TimeSlotId, offering.Id, offering.RestaurantId, request.Date, effectiveCapacity, ct);
+        await waitlistPromoter.ExpireAndPromoteAsync(request.TimeSlotId, service.Id, service.RestaurantId, request.Date, effectiveCapacity, ct);
 
-        var booked = await bookingRepo.GetBookedPartySizeAsync(request.TimeSlotId, offering.Id, request.Date, ct);
+        var booked = await bookingRepo.GetBookedPartySizeAsync(request.TimeSlotId, service.Id, request.Date, ct);
         if (booked + request.PartySize <= effectiveCapacity)
         {
             throw new ConflictException("This slot still has room — please book directly instead of joining the waitlist.");
         }
 
-        var position = await waitlistRepo.GetNextPositionAsync(request.TimeSlotId, offering.Id, request.Date, ct);
+        var position = await waitlistRepo.GetNextPositionAsync(request.TimeSlotId, service.Id, request.Date, ct);
 
         var entry = new Domain.Entities.Waitlist
         {
-            OfferingId = offering.Id,
+            ServiceId = service.Id,
             TimeSlotId = request.TimeSlotId,
             Date = request.Date,
             CustomerName = request.CustomerName,
@@ -104,8 +104,8 @@ public class JoinWaitlistCommandHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         return new WaitlistDetailDto(
-            entry.Id, offering.RestaurantId, offering.Restaurant!.Name, offering.Restaurant!.NameAr,
-            offering.Id, offering.MealType, entry.Date,
+            entry.Id, service.RestaurantId, service.Restaurant!.Name, service.Restaurant!.NameAr,
+            service.Id, service.MealType, entry.Date,
             slot?.StartTime.ToString("HH:mm"), slot?.EndTime.ToString("HH:mm"),
             entry.CustomerName, entry.CustomerPhone, entry.PartySize, entry.Position, entry.Status, entry.NotifiedAt,
             settings.WaitlistOfferWindowMinutes

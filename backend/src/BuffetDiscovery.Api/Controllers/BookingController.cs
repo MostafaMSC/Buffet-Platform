@@ -14,9 +14,9 @@ public class BookingController(ISender mediator) : ControllerBase
 {
     [HttpGet("availability")]
     public async Task<ActionResult<BookingAvailabilityDto>> GetAvailability(
-        [FromQuery] int offeringId, [FromQuery] DateOnly date, CancellationToken ct)
+        [FromQuery] int serviceId, [FromQuery] DateOnly date, CancellationToken ct)
     {
-        return Ok(await mediator.Send(new GetBookingAvailabilityQuery(offeringId, date), ct));
+        return Ok(await mediator.Send(new GetBookingAvailabilityQuery(serviceId, date), ct));
     }
 
     [HttpPost]

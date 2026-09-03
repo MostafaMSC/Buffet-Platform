@@ -16,7 +16,7 @@ public class GetAdminRestaurantsQueryHandler(IRestaurantRepository restaurants)
 
         return all.Select(r => new RestaurantAdminListItemDto(
             r.Id, r.Name, r.NameAr, r.Area!.NameEn, r.PhoneNumber, r.Status, r.CreatedAt,
-            r.Offerings.Count(o => !o.IsDeleted)
+            r.Services.Count(o => !o.IsDeleted)
         )).ToList();
     }
 }

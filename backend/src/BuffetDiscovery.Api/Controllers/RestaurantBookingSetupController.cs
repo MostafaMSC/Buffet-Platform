@@ -8,24 +8,24 @@ using Microsoft.AspNetCore.Mvc;
 namespace BuffetDiscovery.Api.Controllers;
 
 /// Restaurant-side setup for the booking system: time slots / whole-window capacity per
-/// offering, and the restaurant-editable booking settings (cancellation cutoff, overbooking
+/// service, and the restaurant-editable booking settings (cancellation cutoff, overbooking
 /// tolerance, waitlist offer window). Separate from RestaurantDashboardController (Phase 1
-/// profile/offering CRUD) since this is a distinct, newer bounded capability.
+/// profile/service CRUD) since this is a distinct, newer bounded capability.
 [ApiController]
 [Route("api/dashboard/booking")]
 [Authorize(Roles = "RestaurantOwner")]
 public class RestaurantBookingSetupController(ISender mediator) : ControllerBase
 {
-    [HttpGet("offerings/{offeringId:int}/capacity")]
-    public async Task<ActionResult<OfferingCapacityDto>> GetCapacity(int offeringId, CancellationToken ct)
+    [HttpGet("services/{serviceId:int}/capacity")]
+    public async Task<ActionResult<ServiceCapacityDto>> GetCapacity(int serviceId, CancellationToken ct)
     {
-        return Ok(await mediator.Send(new GetOfferingCapacityQuery(offeringId), ct));
+        return Ok(await mediator.Send(new GetServiceCapacityQuery(serviceId), ct));
     }
 
-    [HttpPut("offerings/{offeringId:int}/capacity")]
-    public async Task<IActionResult> SetWholeWindowCapacity(int offeringId, UpdateOfferingCapacityBody body, CancellationToken ct)
+    [HttpPut("services/{serviceId:int}/capacity")]
+    public async Task<IActionResult> SetWholeWindowCapacity(int serviceId, UpdateServiceCapacityBody body, CancellationToken ct)
     {
-        await mediator.Send(new UpdateOfferingCapacityCommand(offeringId, body.Capacity), ct);
+        await mediator.Send(new UpdateServiceCapacityCommand(serviceId, body.Capacity), ct);
         return NoContent();
     }
 
@@ -70,5 +70,5 @@ public class RestaurantBookingSetupController(ISender mediator) : ControllerBase
     }
 }
 
-public record UpdateOfferingCapacityBody(int? Capacity);
+public record UpdateServiceCapacityBody(int? Capacity);
 public record UpdateSlotCapacityBody(int Capacity);

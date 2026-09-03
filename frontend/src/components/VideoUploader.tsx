@@ -60,7 +60,7 @@ export function VideoUploader({ url, onChange }: Props) {
         }}
       />
       {uploading && <span style={{ marginInlineStart: '0.5rem' }}>{t('offeringForm.uploading')}</span>}
-      {error && <div className="form-error" style={{ marginTop: '0.5rem' }}>{error}</div>}
+      {error && <div className="alert bad" style={{ marginTop: 'var(--sp-3)' }}>{error}</div>}
     </div>
   )
 }

@@ -4,9 +4,9 @@ namespace BuffetDiscovery.Application.Common.Interfaces;
 
 public interface IBookingRepository
 {
-    /// Sum of PartySize across Confirmed bookings for a slot (or whole offering window
+    /// Sum of PartySize across Confirmed bookings for a slot (or whole service window
     /// when timeSlotId is null) on one date — what capacity is actually checked against.
-    Task<int> GetBookedPartySizeAsync(int? timeSlotId, int offeringId, DateOnly date, CancellationToken ct);
+    Task<int> GetBookedPartySizeAsync(int? timeSlotId, int serviceId, DateOnly date, CancellationToken ct);
 
     Task<Booking?> GetByConfirmationCodeAsync(string code, CancellationToken ct);
     Task<bool> ConfirmationCodeExistsAsync(string code, CancellationToken ct);

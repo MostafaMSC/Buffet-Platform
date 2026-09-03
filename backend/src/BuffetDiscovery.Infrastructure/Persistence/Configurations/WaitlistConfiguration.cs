@@ -8,9 +8,9 @@ public class WaitlistConfiguration : IEntityTypeConfiguration<Waitlist>
 {
     public void Configure(EntityTypeBuilder<Waitlist> builder)
     {
-        builder.HasOne(w => w.Offering)
+        builder.HasOne(w => w.Service)
             .WithMany()
-            .HasForeignKey(w => w.OfferingId)
+            .HasForeignKey(w => w.ServiceId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(w => w.TimeSlot)
@@ -19,7 +19,7 @@ public class WaitlistConfiguration : IEntityTypeConfiguration<Waitlist>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(w => new { w.TimeSlotId, w.Date, w.Status, w.Position });
-        builder.HasIndex(w => new { w.OfferingId, w.Date, w.Status, w.Position });
+        builder.HasIndex(w => new { w.ServiceId, w.Date, w.Status, w.Position });
         builder.HasIndex(w => w.CustomerPhone);
     }
 }

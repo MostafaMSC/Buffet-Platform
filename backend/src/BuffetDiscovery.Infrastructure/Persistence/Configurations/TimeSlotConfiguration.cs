@@ -8,11 +8,11 @@ public class TimeSlotConfiguration : IEntityTypeConfiguration<TimeSlot>
 {
     public void Configure(EntityTypeBuilder<TimeSlot> builder)
     {
-        builder.HasOne(s => s.Offering)
+        builder.HasOne(s => s.Service)
             .WithMany(o => o.TimeSlots)
-            .HasForeignKey(s => s.OfferingId)
+            .HasForeignKey(s => s.ServiceId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(s => new { s.OfferingId, s.IsDeleted });
+        builder.HasIndex(s => new { s.ServiceId, s.IsDeleted });
     }
 }

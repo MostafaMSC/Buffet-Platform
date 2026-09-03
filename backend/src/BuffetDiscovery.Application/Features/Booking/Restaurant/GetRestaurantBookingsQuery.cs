@@ -7,45 +7,56 @@ using MediatR;
 
 namespace BuffetDiscovery.Application.Features.Booking.Restaurant;
 
-/// The restaurant's booking dashboard: bookings grouped by (offering, time slot, date) so
-/// staff see how full each service window is at a glance rather than a flat booking list.
-public record GetRestaurantBookingsQuery(DateOnly? Date) : IRequest<List<RestaurantBookingGroupDto>>;
+/// The restaurant's booking list, grouped by (service, sitting, date) so staff see how full
+/// each service window is at a glance rather than a flat list of names.
+public record GetRestaurantBookingsQuery(DateOnly? Date, BookingStatus? Status = null)
+    : IRequest<List<RestaurantBookingGroupDto>>;
 
 public class GetRestaurantBookingsQueryHandler(
     IBookingRepository bookingRepo,
     IRestaurantSettingsRepository settingsRepo,
     ICurrentUserService currentUser) : IRequestHandler<GetRestaurantBookingsQuery, List<RestaurantBookingGroupDto>>
 {
+    private static readonly BookingStatus[] SeatHolding =
+        [BookingStatus.Confirmed, BookingStatus.Pending, BookingStatus.CheckedIn];
+
     public async Task<List<RestaurantBookingGroupDto>> Handle(GetRestaurantBookingsQuery request, CancellationToken ct)
     {
         var restaurantId = currentUser.RestaurantId ?? throw new UnauthorizedException("No restaurant associated with this account.");
         var bookings = await bookingRepo.GetForRestaurantAsync(restaurantId, request.Date, ct);
         var settings = await settingsRepo.GetOrCreateAsync(restaurantId, ct);
 
+        if (request.Status.HasValue)
+        {
+            bookings = bookings.Where(b => b.Status == request.Status.Value).ToList();
+        }
+
         return bookings
-            .GroupBy(b => (b.OfferingId, b.TimeSlotId, b.Date))
+            .GroupBy(b => (b.ServiceId, b.TimeSlotId, b.Date))
             .Select(g =>
             {
                 var first = g.First();
-                var offering = first.Offering!;
-                var capacity = first.TimeSlot?.Capacity ?? offering.Capacity ?? 0;
-                var effectiveCapacity = CapacityCalculator.EffectiveCapacity(capacity, settings.OverbookingTolerancePercent);
-                var bookedPartySize = g.Where(b => b.Status == BookingStatus.Confirmed).Sum(b => b.PartySize);
+                var service = first.Service!;
+                var capacity = first.TimeSlot?.Capacity ?? service.Capacity ?? 0;
 
                 return new RestaurantBookingGroupDto(
-                    first.OfferingId,
-                    offering.MealType,
+                    first.ServiceId,
+                    service.Name,
+                    service.NameAr,
+                    service.ServiceType,
+                    service.MealType,
                     first.Date,
                     first.TimeSlotId,
-                    first.TimeSlot?.StartTime.ToString("HH:mm") ?? offering.OpensAt.ToString("HH:mm"),
-                    first.TimeSlot?.EndTime.ToString("HH:mm") ?? offering.ClosesAt.ToString("HH:mm"),
+                    first.TimeSlot?.StartTime.ToString("HH:mm") ?? service.OpensAt.ToString("HH:mm"),
+                    first.TimeSlot?.EndTime.ToString("HH:mm") ?? service.ClosesAt.ToString("HH:mm"),
                     capacity,
-                    effectiveCapacity,
-                    bookedPartySize,
+                    CapacityCalculator.EffectiveCapacity(capacity, settings.OverbookingTolerancePercent),
+                    g.Where(b => SeatHolding.Contains(b.Status)).Sum(b => b.PartySize),
                     g.OrderBy(b => b.CreatedAt)
-                        .Select(b => new RestaurantBookingListItemDto(b.Id, b.ConfirmationCode, b.CustomerName, b.CustomerPhone, b.PartySize, b.Status, b.CreatedAt))
-                        .ToList()
-                );
+                        .Select(b => new RestaurantBookingListItemDto(
+                            b.Id, b.ConfirmationCode, b.CustomerName, b.CustomerPhone, b.CustomerEmail,
+                            b.SpecialRequests, b.PartySize, b.Adults, b.Children, b.TotalPrice, b.Status, b.CreatedAt))
+                        .ToList());
             })
             .OrderBy(x => x.Date).ThenBy(x => x.StartTime)
             .ToList();

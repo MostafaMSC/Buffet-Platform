@@ -53,10 +53,10 @@ public class AdminController(ISender mediator) : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("offerings/{id:int}")]
-    public async Task<IActionResult> DeleteOffering(int id, CancellationToken ct)
+    [HttpDelete("services/{id:int}")]
+    public async Task<IActionResult> DeleteService(int id, CancellationToken ct)
     {
-        await mediator.Send(new AdminDeleteOfferingCommand(id), ct);
+        await mediator.Send(new AdminDeleteServiceCommand(id), ct);
         return NoContent();
     }
 

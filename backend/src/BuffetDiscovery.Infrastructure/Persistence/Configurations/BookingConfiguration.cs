@@ -8,9 +8,9 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 {
     public void Configure(EntityTypeBuilder<Booking> builder)
     {
-        builder.HasOne(b => b.Offering)
+        builder.HasOne(b => b.Service)
             .WithMany(o => o.Bookings)
-            .HasForeignKey(b => b.OfferingId)
+            .HasForeignKey(b => b.ServiceId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(b => b.TimeSlot)
@@ -22,6 +22,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasIndex(b => b.ConfirmationCode).IsUnique();
         builder.HasIndex(b => b.CustomerPhone);
         builder.HasIndex(b => new { b.TimeSlotId, b.Date, b.Status });
-        builder.HasIndex(b => new { b.OfferingId, b.Date, b.Status });
+        builder.HasIndex(b => new { b.ServiceId, b.Date, b.Status });
     }
 }

@@ -1,22 +1,21 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import { Badge, Skeleton } from '../../components/ui'
 import type { RestaurantSettings } from '../../types'
+import { apiError } from '../../utils/format'
 
+/// The rules that sit behind every booking this restaurant takes: how late a guest may
+/// cancel, how far ahead the waitlist opens, and how far past capacity it will go.
 export function BookingSettingsPage() {
   const { t } = useTranslation()
   const [settings, setSettings] = useState<RestaurantSettings | null>(null)
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    api.get<RestaurantSettings>('/dashboard/booking/settings').then((res) => {
-      setSettings(res.data)
-      setLoading(false)
-    })
+    api.get<RestaurantSettings>('/dashboard/booking/settings').then((res) => setSettings(res.data))
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,67 +31,70 @@ export function BookingSettingsPage() {
         overbookingTolerancePercent: settings.overbookingTolerancePercent,
       })
       setSaved(true)
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('common.error')
-      setError(message)
+    } catch (err) {
+      setError(apiError(err, t('common.error')))
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading || !settings) return <p className="state-message">{t('common.loading')}</p>
+  if (!settings) return <Skeleton height={320} radius={14} />
+
+  const update = <K extends keyof RestaurantSettings>(key: K, value: RestaurantSettings[K]) =>
+    setSettings((prev) => (prev ? { ...prev, [key]: value } : prev))
 
   return (
-    <div className="container">
-      <Link to="/dashboard" className="nav-link" style={{ display: 'inline-block', marginBottom: '0.75rem' }}>
-        ← {t('dashboard.title')}
-      </Link>
-      <form className="form-card" onSubmit={handleSubmit} style={{ maxWidth: 480 }}>
-        <h1>{t('bookingSettings.title')}</h1>
+    <div className="stack stack-5">
+      <div className="section-head">
+        <div>
+          <h1 style={{ fontSize: '1.5rem' }}>{t('bookingSettings.title')}</h1>
+          {settings.isFoundingRestaurant && <Badge kind="solid">{t('bookingSettings.foundingBadge')}</Badge>}
+        </div>
+      </div>
 
-        {settings.isFoundingRestaurant && <div className="badge accent">{t('bookingSettings.foundingBadge')}</div>}
+      {error && <div className="alert bad">{error}</div>}
+      {saved && <div className="alert good">{t('bookingSettings.saved')}</div>}
 
-        {error && <div className="form-error">{error}</div>}
-        {saved && <div className="banner pending" style={{ background: '#e3f2ea', color: 'var(--color-accent)' }}>{t('bookingSettings.saved')}</div>}
-
-        <div className="form-field">
-          <label>{t('bookingSettings.cancellationCutoff')}</label>
+      <form className="card card-pad stack stack-4" onSubmit={handleSubmit} style={{ maxWidth: 520 }}>
+        <label className="field">
+          <span>{t('bookingSettings.cancellationCutoff')}</span>
           <input
             type="number"
             min={0}
             value={settings.cancellationCutoffMinutes}
-            onChange={(e) => setSettings({ ...settings, cancellationCutoffMinutes: Number(e.target.value) })}
+            onChange={(e) => update('cancellationCutoffMinutes', Number(e.target.value))}
           />
-          <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>{t('bookingSettings.cancellationCutoffHint')}</span>
-        </div>
+          <span className="hint">{t('bookingSettings.cancellationCutoffHint')}</span>
+        </label>
 
-        <div className="form-field">
-          <label>{t('bookingSettings.waitlistWindow')}</label>
+        <label className="field">
+          <span>{t('bookingSettings.waitlistWindow')}</span>
           <input
             type="number"
             min={1}
             value={settings.waitlistOfferWindowMinutes}
-            onChange={(e) => setSettings({ ...settings, waitlistOfferWindowMinutes: Number(e.target.value) })}
+            onChange={(e) => update('waitlistOfferWindowMinutes', Number(e.target.value))}
           />
-          <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>{t('bookingSettings.waitlistWindowHint')}</span>
-        </div>
+          <span className="hint">{t('bookingSettings.waitlistWindowHint')}</span>
+        </label>
 
-        <div className="form-field">
-          <label>{t('bookingSettings.overbooking')}</label>
+        <label className="field">
+          <span>{t('bookingSettings.overbooking')}</span>
           <input
             type="number"
             min={0}
             max={100}
             value={settings.overbookingTolerancePercent}
-            onChange={(e) => setSettings({ ...settings, overbookingTolerancePercent: Number(e.target.value) })}
+            onChange={(e) => update('overbookingTolerancePercent', Number(e.target.value))}
           />
-          <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>{t('bookingSettings.overbookingHint')}</span>
-        </div>
+          <span className="hint">{t('bookingSettings.overbookingHint')}</span>
+        </label>
 
-        <button className="btn" type="submit" disabled={saving}>
-          {t('dashboard.save')}
-        </button>
+        <div>
+          <button className="btn" type="submit" disabled={saving}>
+            {saving ? t('common.loading') : t('common.save')}
+          </button>
+        </div>
       </form>
     </div>
   )
