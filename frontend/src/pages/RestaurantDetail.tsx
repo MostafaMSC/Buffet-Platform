@@ -82,7 +82,7 @@ export function RestaurantDetail() {
                 <div className="review" key={review.id}>
                   <div className="row-between">
                     <strong className="small">{review.customerName}</strong>
-                    <span style={{ color: 'var(--c-brand)' }}><Stars rating={review.rating} size={13} /></span>
+                    <span style={{ color: 'var(--c-gold-dark)' }}><Stars rating={review.rating} size={13} /></span>
                   </div>
                   {review.comment && <p className="small soft" style={{ marginTop: 4 }}>{review.comment}</p>}
                 </div>

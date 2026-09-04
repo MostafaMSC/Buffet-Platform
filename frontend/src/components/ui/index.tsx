@@ -1,6 +1,23 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+/* ---------------------------------------------------------------- brand */
+
+/// The header/footer mark: a tiered stand, the spread motif at the centre of the Maftooh
+/// emblem, simplified to a glyph that stays crisp at 20px. Renders in `currentColor`, so
+/// its gold-on-green comes from .brand-mark rather than being baked into the SVG.
+export function Logo({ size = 19 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="6.4" r="1.5" fill="currentColor" />
+      <ellipse cx="12" cy="10.2" rx="3.3" ry="1.05" fill="currentColor" />
+      <ellipse cx="12" cy="14.4" rx="5.6" ry="1.35" fill="currentColor" />
+      <ellipse cx="12" cy="19" rx="8.2" ry="1.65" fill="currentColor" />
+      <path d="M12 9.2v9.6" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 /* ---------------------------------------------------------------- rating */
 
 export function Stars({ rating, size = 14 }: { rating: number; size?: number }) {

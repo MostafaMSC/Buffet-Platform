@@ -16,10 +16,17 @@
   --c-line: #e9e5e0;
   --c-line-strong: #d6d0c9;
 
-  /* One brand colour, used sparingly: primary actions and the active state. */
-  --c-brand: #c1440e;
-  --c-brand-dark: #9c360a;
-  --c-brand-soft: #fdf0e9;
+  /* Brand: the deep forest green and antique gold from the Maftooh emblem. Green carries
+     primary actions and active state, the same role the old terracotta held; gold is a
+     second, sparer accent for the touches the emblem uses it for — ratings, the founding
+     badge — never for button text or body copy, where gold-on-light reads too weak. */
+  --c-brand: #1f4433;
+  --c-brand-dark: #14301f;
+  --c-brand-soft: #e9f0ea;
+
+  --c-gold: #b8903f;
+  --c-gold-dark: #8f6c28;
+  --c-gold-soft: #faf2df;
 
   /* Semantic colours are deliberately separate from the brand hue so "available"
      never reads as "promoted". */
@@ -419,7 +426,7 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   display: grid; place-items: center;
   border-radius: var(--r-sm);
   background: var(--c-brand);
-  color: #fff;
+  color: var(--c-gold);
   font-size: 1rem;
 }
 
@@ -551,7 +558,7 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
 .service-card-price { margin-top: var(--sp-1); font-size: 0.92rem; }
 .service-card-price b { font-weight: 700; }
 
-.rating-inline { display: inline-flex; align-items: center; gap: 3px; font-size: 0.86rem; font-weight: 600; }
+.rating-inline { display: inline-flex; align-items: center; gap: 3px; font-size: 0.86rem; font-weight: 600; color: var(--c-gold-dark); }
 
 .fav-btn {
   width: 34px; height: 34px;
