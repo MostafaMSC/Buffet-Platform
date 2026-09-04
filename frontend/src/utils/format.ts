@@ -69,10 +69,25 @@ export function durationLabel(minutes: number | null, t: (k: string, o?: Record<
   return t('duration.minutes', { count: mins })
 }
 
-/// Reads an API error the way the backend reports it, falling back to a generic message.
-export function apiError(err: unknown, fallback: string): string {
-  const message = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-  if (message?.message) return message.message
-  const firstValidation = message?.errors && Object.values(message.errors)[0]?.[0]
+/// Reads an API error in whichever language the guest is browsing in. The backend attaches
+/// a stable `code` (and any values to interpolate) to booking/waitlist errors; that's looked
+/// up under `errors.<code>` first. A code with no matching translation, or none at all, falls
+/// back to the server's own English message, then to `fallback`.
+export function apiError(
+  err: unknown,
+  fallback: string,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  const body = (err as {
+    response?: { data?: { message?: string; code?: string; params?: Record<string, unknown>; errors?: Record<string, string[]> } }
+  })?.response?.data
+
+  if (body?.code) {
+    const translated = t(`errors.${body.code}`, { ...body.params, defaultValue: '' })
+    if (translated) return translated
+  }
+
+  if (body?.message) return body.message
+  const firstValidation = body?.errors && Object.values(body.errors)[0]?.[0]
   return firstValidation ?? fallback
 }

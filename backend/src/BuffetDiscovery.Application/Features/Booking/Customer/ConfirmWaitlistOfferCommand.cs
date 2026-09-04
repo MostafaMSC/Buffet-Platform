@@ -31,11 +31,11 @@ public class ConfirmWaitlistOfferCommandHandler(
     public async Task<BookingDetailDto> Handle(ConfirmWaitlistOfferCommand request, CancellationToken ct)
     {
         var entry = await waitlistRepo.GetByIdForCustomerAsync(request.WaitlistId, request.CustomerPhone.Trim(), ct)
-            ?? throw new NotFoundException("Waitlist entry not found.");
+            ?? throw new NotFoundException("Waitlist entry not found.", "waitlist_not_found");
 
         if (entry.Status != WaitlistStatus.Offered)
         {
-            throw new ConflictException("This waitlist offer is no longer active.");
+            throw new ConflictException("This waitlist offer is no longer active.", "waitlist_offer_inactive");
         }
 
         var service = entry.Service!;
@@ -45,7 +45,7 @@ public class ConfirmWaitlistOfferCommandHandler(
         {
             entry.Status = WaitlistStatus.Expired;
             await unitOfWork.SaveChangesAsync(ct);
-            throw new ConflictException("This waitlist offer has expired.");
+            throw new ConflictException("This waitlist offer has expired.", "waitlist_offer_expired");
         }
 
         string code;

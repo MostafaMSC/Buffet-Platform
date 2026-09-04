@@ -23,7 +23,7 @@ public class GetServiceDetailQueryHandler(
     public async Task<ServiceDetailDto> Handle(GetServiceDetailQuery request, CancellationToken ct)
     {
         var service = await services.GetPublicByIdAsync(request.ServiceId, ct)
-            ?? throw new NotFoundException("Service not found.");
+            ?? throw new NotFoundException("Service not found.", "service_not_found");
 
         var restaurant = service.Restaurant!;
         var city = restaurant.Area!.City!;

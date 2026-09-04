@@ -22,7 +22,7 @@ public class GetBookingAvailabilityQueryHandler(
     public async Task<ServiceAvailabilityDto> Handle(GetBookingAvailabilityQuery request, CancellationToken ct)
     {
         var service = await services.GetPublicByIdAsync(request.ServiceId, ct)
-            ?? throw new NotFoundException("Service not found.");
+            ?? throw new NotFoundException("Service not found.", "service_not_found");
 
         var bookingEnabled = service.TimeSlots.Any(s => !s.IsDeleted) || service.Capacity.HasValue;
 

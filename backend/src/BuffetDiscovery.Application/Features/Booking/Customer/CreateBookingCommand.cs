@@ -54,30 +54,30 @@ public class CreateBookingCommandHandler(
     public async Task<BookingDetailDto> Handle(CreateBookingCommand request, CancellationToken ct)
     {
         var service = await services.GetPublicByIdAsync(request.ServiceId, ct)
-            ?? throw new NotFoundException("Service not found.");
+            ?? throw new NotFoundException("Service not found.", "service_not_found");
 
         var partySize = request.Adults + request.Children;
         var nowLocal = DateTime.UtcNow.AddHours(3); // Baghdad is UTC+3
 
         if (partySize < service.MinGuests)
         {
-            throw new ConflictException($"This service takes bookings for {service.MinGuests} guests or more.");
+            throw new ConflictException($"This service takes bookings for {service.MinGuests} guests or more.", "booking_min_guests", new { min = service.MinGuests });
         }
 
         if (service.MaxGuests.HasValue && partySize > service.MaxGuests.Value)
         {
-            throw new ConflictException($"This service takes bookings for up to {service.MaxGuests.Value} guests.");
+            throw new ConflictException($"This service takes bookings for up to {service.MaxGuests.Value} guests.", "booking_max_guests", new { max = service.MaxGuests.Value });
         }
 
         if (!RecurrenceEvaluator.MatchesRecurrence(service, request.Date))
         {
-            throw new ConflictException("This service is not served on the selected date.");
+            throw new ConflictException("This service is not served on the selected date.", "not_served_on_date");
         }
 
         var dayStatus = await availability.GetAsync(service.Id, request.Date, ct);
         if (dayStatus is not null && !dayStatus.IsActive)
         {
-            throw new ConflictException("This service is not available on the selected date.");
+            throw new ConflictException("This service is not available on the selected date.", "not_available_on_date");
         }
 
         var settings = await settingsRepo.GetOrCreateAsync(service.RestaurantId, ct);
@@ -90,7 +90,7 @@ public class CreateBookingCommandHandler(
 
         if (request.TimeSlotId.HasValue && (slotEntity is null || slotEntity.IsDeleted || slotEntity.ServiceId != service.Id))
         {
-            throw new NotFoundException("Time slot not found.");
+            throw new NotFoundException("Time slot not found.", "slot_not_found");
         }
 
         // A slotted service always needs a slot to book against; falling through to
@@ -100,11 +100,11 @@ public class CreateBookingCommandHandler(
         // sitting).
         if (slotEntity is null && !service.Capacity.HasValue && service.TimeSlots.Any(s => !s.IsDeleted))
         {
-            throw new ConflictException("Please choose a sitting time.");
+            throw new ConflictException("Please choose a sitting time.", "choose_sitting");
         }
 
         var nominalCapacity = slotEntity?.Capacity ?? service.Capacity
-            ?? throw new ConflictException("This service isn't set up to take bookings yet.");
+            ?? throw new ConflictException("This service isn't set up to take bookings yet.", "not_bookable");
 
         await waitlistPromoter.ExpireAndPromoteAsync(
             request.TimeSlotId, service.Id, service.RestaurantId, request.Date,
@@ -115,25 +115,25 @@ public class CreateBookingCommandHandler(
         var slots = AvailabilityCalculator.Build(service, request.Date, booked, overrides, settings.OverbookingTolerancePercent);
 
         var slot = slots.FirstOrDefault(s => s.TimeSlotId == request.TimeSlotId)
-            ?? throw new ConflictException("This sitting is not available.");
+            ?? throw new ConflictException("This sitting is not available.", "sitting_unavailable");
 
         if (slot.IsBlocked)
         {
-            throw new ConflictException("This sitting has been closed by the restaurant.");
+            throw new ConflictException("This sitting has been closed by the restaurant.", "sitting_closed");
         }
 
         if (!slot.Fits(partySize))
         {
-            throw new ConflictException(slot.Remaining > 0
-                ? $"Only {slot.Remaining} seats are left for this sitting."
-                : "This sitting is full. Join the waitlist instead.");
+            throw slot.Remaining > 0
+                ? new ConflictException($"Only {slot.Remaining} seats are left for this sitting.", "seats_left", new { count = slot.Remaining })
+                : new ConflictException("This sitting is full. Join the waitlist instead.", "sitting_full");
         }
 
         if (AvailabilityCalculator.IsPast(slot, request.Date, nowLocal, service.MinAdvanceMinutes))
         {
-            throw new ConflictException(service.MinAdvanceMinutes > 0
-                ? $"Bookings close {service.MinAdvanceMinutes} minutes before the sitting starts."
-                : "This sitting has already started.");
+            throw service.MinAdvanceMinutes > 0
+                ? new ConflictException($"Bookings close {service.MinAdvanceMinutes} minutes before the sitting starts.", "advance_notice_required", new { minutes = service.MinAdvanceMinutes })
+                : new ConflictException("This sitting has already started.", "sitting_started");
         }
 
         string code;

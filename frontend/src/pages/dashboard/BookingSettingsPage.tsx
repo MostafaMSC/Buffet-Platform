@@ -32,7 +32,7 @@ export function BookingSettingsPage() {
       })
       setSaved(true)
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setSaving(false)
     }

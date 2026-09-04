@@ -49,7 +49,7 @@ export function CalendarPage() {
       load()
       setSelected(null)
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     }
   }
 

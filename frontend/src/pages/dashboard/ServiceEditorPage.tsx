@@ -157,7 +157,7 @@ export function ServiceEditorPage() {
       }
       navigate('/dashboard/services')
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setSaving(false)
     }

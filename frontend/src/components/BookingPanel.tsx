@@ -108,7 +108,7 @@ export function BookingPanel({
       setOpen(false)
       navigate(`/bookings/${booking.confirmationCode}?new=1`)
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
       setStep('when')
     } finally {
       setSubmitting(false)
@@ -129,7 +129,7 @@ export function BookingPanel({
       }) as { position: number }
       setWaitlisted(entry.position)
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setSubmitting(false)
     }

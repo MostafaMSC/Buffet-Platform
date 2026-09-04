@@ -47,7 +47,7 @@ export function BookingDetailPage() {
       await cancelBooking(code!)
       load()
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setBusy(false)
     }

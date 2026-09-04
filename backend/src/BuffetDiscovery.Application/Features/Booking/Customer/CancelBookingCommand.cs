@@ -27,13 +27,13 @@ public class CancelBookingCommandHandler(
     public async Task Handle(CancelBookingCommand request, CancellationToken ct)
     {
         var booking = await bookingRepo.GetByConfirmationCodeAsync(request.ConfirmationCode.Trim(), ct)
-            ?? throw new NotFoundException("Booking not found.");
+            ?? throw new NotFoundException("Booking not found.", "booking_not_found");
 
         // A request still awaiting the restaurant's answer can be withdrawn as freely as a
         // confirmed one; anything already cancelled, seated or closed out cannot.
         if (booking.Status is not (BookingStatus.Confirmed or BookingStatus.Pending))
         {
-            throw new ConflictException("This booking can no longer be cancelled.");
+            throw new ConflictException("This booking can no longer be cancelled.", "cancel_not_allowed");
         }
 
         var service = booking.Service!;
@@ -47,7 +47,8 @@ public class CancelBookingCommandHandler(
         if (now > bookingDateTime.AddMinutes(-cutoff))
         {
             throw new ConflictException(
-                $"Cancellations must be made at least {cutoff} minutes before the booking time.");
+                $"Cancellations must be made at least {cutoff} minutes before the booking time.",
+                "cancel_cutoff", new { minutes = cutoff });
         }
 
         booking.Status = BookingStatus.Cancelled;

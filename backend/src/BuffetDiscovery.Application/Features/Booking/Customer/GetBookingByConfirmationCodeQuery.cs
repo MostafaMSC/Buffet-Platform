@@ -19,7 +19,7 @@ public class GetBookingByConfirmationCodeQueryHandler(
     public async Task<BookingDetailDto> Handle(GetBookingByConfirmationCodeQuery request, CancellationToken ct)
     {
         var booking = await bookingRepo.GetByConfirmationCodeAsync(request.ConfirmationCode.Trim(), ct)
-            ?? throw new NotFoundException("Booking not found.");
+            ?? throw new NotFoundException("Booking not found.", "booking_not_found");
 
         var settings = await settingsRepo.GetOrCreateAsync(booking.Service!.RestaurantId, ct);
         return BookingMapper.ToDetail(booking, settings.CancellationCutoffMinutes);

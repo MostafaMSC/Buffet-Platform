@@ -28,9 +28,9 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             ApplicationExceptions.ValidationException validationEx =>
                 (HttpStatusCode.BadRequest, (object)new { message = "Validation failed.", errors = validationEx.Errors }),
             ApplicationExceptions.NotFoundException notFoundEx =>
-                (HttpStatusCode.NotFound, new { message = notFoundEx.Message }),
+                (HttpStatusCode.NotFound, (object)new { message = notFoundEx.Message, code = notFoundEx.Code, @params = notFoundEx.Params }),
             ApplicationExceptions.ConflictException conflictEx =>
-                (HttpStatusCode.Conflict, new { message = conflictEx.Message }),
+                (HttpStatusCode.Conflict, new { message = conflictEx.Message, code = conflictEx.Code, @params = conflictEx.Params }),
             ApplicationExceptions.UnauthorizedException unauthorizedEx =>
                 (HttpStatusCode.Unauthorized, new { message = unauthorizedEx.Message }),
             _ => (HttpStatusCode.InternalServerError, new { message = "An unexpected error occurred." })

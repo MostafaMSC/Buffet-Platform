@@ -32,7 +32,7 @@ export function MyBookings() {
       setResult(data)
       localStorage.setItem('buffet_phone', phone.trim())
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setLoading(false)
     }
@@ -45,7 +45,7 @@ export function MyBookings() {
       await confirmWaitlistOffer(waitlistId, phone.trim())
       await search()
     } catch (err) {
-      setError(apiError(err, t('common.error')))
+      setError(apiError(err, t('common.error'), t))
     } finally {
       setBusyId(null)
     }
