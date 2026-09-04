@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useFavorites } from '../hooks/useFavorites'
-import { HeartIcon, Icon, Logo } from './ui'
+import { HeartIcon, Icon } from './ui'
 
 export function Header() {
   const { t, i18n } = useTranslation()
@@ -19,8 +19,7 @@ export function Header() {
     <header className="site-header">
       <div className="container">
         <Link to="/" className="brand" aria-label={t('appName')}>
-          <span className="brand-mark"><Logo /></span>
-          <span>{t('appName')}</span>
+          <img src="/logo.png" alt={t('appName')} className="brand-logo" />
         </Link>
 
         <nav className="nav" aria-label={t('nav.main')}>

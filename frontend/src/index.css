@@ -64,7 +64,7 @@
   --t-fast: 140ms var(--ease);
   --t-base: 220ms var(--ease);
 
-  --header-h: 72px;
+  --header-h: 84px;
   --page-max: 1280px;
 
   --font-sans: 'Plus Jakarta Sans', 'IBM Plex Sans Arabic', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -417,18 +417,9 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
 
 .brand {
   display: inline-flex; align-items: center; gap: var(--sp-2);
-  font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em;
   min-width: 0;
 }
-.brand > span:not(.brand-mark) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.brand-mark {
-  width: 34px; height: 34px;
-  display: grid; place-items: center;
-  border-radius: var(--r-sm);
-  background: var(--c-brand);
-  color: var(--c-gold);
-  font-size: 1rem;
-}
+.brand-logo { height: 64px; width: auto; display: block; }
 
 .nav { display: flex; align-items: center; gap: var(--sp-1); flex-shrink: 0; }
 
@@ -463,14 +454,10 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
    a signed-in owner has two extra entries and the row must still fit. */
 @media (max-width: 560px) {
   .site-header > .container { gap: var(--sp-2); }
-  .brand-mark { width: 30px; height: 30px; }
+  .brand-logo { height: 48px; }
   .nav { gap: 0; }
   .nav-link { padding-inline: var(--sp-2); }
   .nav-link.outlined { padding-inline: var(--sp-3); }
-}
-
-@media (max-width: 420px) {
-  .brand > span:not(.brand-mark) { display: none; }
 }
 
 /* Auth pages: one narrow card, centred, so signing in never feels like a form buried in
