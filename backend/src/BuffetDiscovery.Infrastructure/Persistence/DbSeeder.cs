@@ -16,12 +16,67 @@ public static class DbSeeder
         await SeedBookingSampleDataAsync(db);
     }
 
-    private static string Photo(string seed, int w = 900, int h = 600) =>
-        $"https://picsum.photos/seed/{Uri.EscapeDataString(seed)}/{w}/{h}";
+    /// Every seeded picture is a real photograph shipped in the frontend's public folder, so a
+    /// fresh database looks like the product instead of a wall of name-seeded stock. The paths are
+    /// root-relative and the frontend serves that folder directly, so they need no API proxy.
+    private static string Asset(string file) => $"/{file}";
 
-    /// Buffet/set-menu photos are local illustrations keyed to what the service actually serves
-    /// (see the PhotoThemes on each SeedService below), rather than a name-seeded stock photo.
-    private static string FoodPhoto(string theme) => $"/seed-images/{theme}.svg";
+    /// Look a photo up, and fail loudly rather than seeding a broken <img> when a key is missing —
+    /// nothing here is compiler-checked, so an unmapped theme has to surface at seed time.
+    private static string Lookup(IReadOnlyDictionary<string, string> map, string key, string what) =>
+        map.TryGetValue(key, out var file)
+            ? Asset(file)
+            : throw new InvalidOperationException($"No seed photo mapped for {what} '{key}'.");
+
+    /// Buffet/set-menu photos are keyed to what the service actually serves (see the PhotoThemes on
+    /// each SeedService below), so a breakfast buffet shows a breakfast and a fish menu shows fish.
+    private static string FoodPhoto(string theme) => Lookup(PhotosByTheme, theme, "theme");
+
+    private static string CoverPhoto(string restaurant) => Lookup(CoversByRestaurant, restaurant, "restaurant");
+
+    private static string CityPhoto(string citySlug) => Lookup(CityImagesBySlug, citySlug, "city");
+
+    private static readonly Dictionary<string, string> PhotosByTheme = new()
+    {
+        ["breakfast-international"] = "gettyimages-531306158-612x612.jpg",
+        ["breakfast-levantine"] = "gettyimages-2163411570-612x612.jpg",
+        ["breakfast-iraqi"] = "gettyimages-1441333698-612x612.jpg",
+        ["weekend-buffet-hall"] = "gettyimages-175506580-612x612.jpg",
+        ["iraqi-feast"] = "gettyimages-155033848-612x612.jpg",
+        ["mixed-grill"] = "gettyimages-2202434182-612x612.jpg",
+        ["dessert-arabic"] = "gettyimages-1492861210-612x612.jpg",
+        ["mezze-cold"] = "gettyimages-2244146867-612x612.jpg",
+        ["business-lunch"] = "gettyimages-657021234-612x612.jpg",
+        ["iftar-table"] = "catering-buffet.jpg",
+        ["romantic-dinner"] = "gettyimages-1441053227-612x612.jpg",
+        ["rice-sides"] = "gettyimages-91509530-612x612.jpg",
+        ["kurdish-lamb"] = "gettyimages-123063989-612x612.jpg",
+        ["grilled-fish"] = "gettyimages-2157940277-612x612.jpg",
+        ["seafood-platter"] = "gettyimages-1441334460-612x612.jpg",
+        ["chicken-rice"] = "gettyimages-755656679-612x612.jpg",
+        ["biryani-tashreeb"] = "gettyimages-1438809400-612x612.jpg",
+        ["family-share-grill"] = "gettyimages-1441053227-612x612.jpg",
+    };
+
+    /// A cover is the restaurant's own banner, so it never repeats a picture used by one of that
+    /// restaurant's own services — seeing the same photo twice on one page reads as a bug.
+    private static readonly Dictionary<string, string> CoversByRestaurant = new()
+    {
+        ["Al-Rasheed Terrace"] = "luxury-plate-meal-vintage-celebration.jpg",
+        ["Mansour Garden Hall"] = "open-food-containers.jpg",
+        ["Palestine Grand Buffet"] = "gettyimages-175506580-612x612.jpg",
+        ["Ankawa Terrace"] = "gettyimages-755656679-612x612.jpg",
+        ["Basra Corniche Kitchen"] = "gettyimages-1441053227-612x612.jpg",
+        ["Zayouna Family Restaurant"] = "gettyimages-2254400591-612x612.jpg",
+        ["Harthiya Morning Table"] = "gettyimages-2231131197-612x612.jpg",
+    };
+
+    private static readonly Dictionary<string, string> CityImagesBySlug = new()
+    {
+        ["baghdad"] = "gettyimages-91509530-612x612.jpg",
+        ["erbil"] = "gettyimages-123063989-612x612.jpg",
+        ["basra"] = "gettyimages-2157940277-612x612.jpg",
+    };
 
     // ---------------------------------------------------------------- locations
 
@@ -66,7 +121,7 @@ public static class DbSeeder
                 Slug = c.Slug,
                 Latitude = c.Lat,
                 Longitude = c.Lng,
-                ImageUrl = Photo($"city-{c.Slug}", 800, 600),
+                ImageUrl = CityPhoto(c.Slug),
                 SortOrder = citySort++
             };
 
@@ -203,7 +258,7 @@ public static class DbSeeder
                 Description = seed.Desc,
                 DescriptionAr = seed.DescAr,
                 Features = seed.Features,
-                CoverPhotoUrl = Photo(seed.Name, 1200, 800),
+                CoverPhotoUrl = CoverPhoto(seed.Name),
                 Status = RestaurantStatus.Approved
             };
 
