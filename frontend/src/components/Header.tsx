@@ -19,7 +19,7 @@ export function Header() {
     <header className="site-header">
       <div className="container">
         <Link to="/" className="brand" aria-label={t('appName')}>
-          <img src="/logo.png" alt={t('appName')} className="brand-logo" />
+          <img src="/logo-mark.webp" alt={t('appName')} className="brand-logo" />
         </Link>
 
         <nav className="nav" aria-label={t('nav.main')}>
