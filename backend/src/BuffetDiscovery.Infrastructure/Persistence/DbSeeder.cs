@@ -16,8 +16,18 @@ public static class DbSeeder
         await SeedBookingSampleDataAsync(db);
     }
 
-    private static string Photo(string seed, int w = 900, int h = 600) =>
-        $"https://picsum.photos/seed/{Uri.EscapeDataString(seed)}/{w}/{h}";
+    private const int PlaceholderPhotoCount = 5;
+
+    /// Seed data ships with no real restaurant photography, so every card/gallery slot
+    /// gets one of a handful of locally-served placeholder images instead of an
+    /// externally-hosted one — the app then has zero photos that break on a network with
+    /// no outbound internet access (a common case for local dev behind a firewall).
+    private static string Photo(string seed, int w = 900, int h = 600)
+    {
+        _ = w; _ = h; // kept so call sites reading "intended size" don't need to change
+        var index = (Math.Abs(seed.GetHashCode()) % PlaceholderPhotoCount) + 1;
+        return $"/seed-photos/placeholder-{index}.svg";
+    }
 
     // ---------------------------------------------------------------- locations
 
