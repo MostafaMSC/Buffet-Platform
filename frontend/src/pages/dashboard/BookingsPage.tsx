@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { getRestaurantBookings, markBookingStatus } from '../../api/endpoints'
-import { Badge, EmptyState, Skeleton } from '../../components/ui'
+import { Badge, EmptyState, Select, Skeleton } from '../../components/ui'
 import type { BookingStatus, RestaurantBookingGroup } from '../../types'
 import { apiError, formatDate, formatTime, money, todayInBaghdad } from '../../utils/format'
 
@@ -84,12 +84,12 @@ export function BookingsPage() {
         </label>
         <label className="field" style={{ width: 190 }}>
           <span>{t('bookingsAdmin.status')}</span>
-          <select value={status} onChange={(e) => patch({ status: e.target.value })}>
+          <Select value={status} onChange={(e) => patch({ status: e.target.value })}>
             <option value="">{t('bookingsAdmin.all')}</option>
             {(['Pending', 'Confirmed', 'CheckedIn', 'Completed', 'NoShow', 'Cancelled'] as const).map((s) => (
               <option key={s} value={s}>{t(`bookingStatus.${s}`)}</option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 

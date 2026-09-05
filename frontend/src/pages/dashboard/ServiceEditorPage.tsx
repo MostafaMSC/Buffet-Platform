@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { createService, getServiceForEdit, updateService } from '../../api/endpoints'
 import { PhotoUploader } from '../../components/PhotoUploader'
 import { VideoUploader } from '../../components/VideoUploader'
-import { Skeleton } from '../../components/ui'
+import { Select, Skeleton } from '../../components/ui'
 import {
   CUISINES,
   DIETARY_TAGS,
@@ -189,24 +189,24 @@ export function ServiceEditorPage() {
             <div className="form-grid">
               <label className="field">
                 <span>{t('services.type')}</span>
-                <select value={form.serviceType} onChange={(e) => set('serviceType', e.target.value as ServiceInput['serviceType'])}>
+                <Select value={form.serviceType} onChange={(e) => set('serviceType', e.target.value as ServiceInput['serviceType'])}>
                   <option value="Buffet">{t('serviceType.Buffet')}</option>
                   <option value="SetMenu">{t('serviceType.SetMenu')}</option>
-                </select>
+                </Select>
               </label>
               <label className="field">
                 <span>{t('services.meal')}</span>
-                <select value={form.mealType} onChange={(e) => set('mealType', e.target.value as ServiceInput['mealType'])}>
+                <Select value={form.mealType} onChange={(e) => set('mealType', e.target.value as ServiceInput['mealType'])}>
                   {MEAL_TYPES.map((meal) => <option key={meal} value={meal}>{t(`mealType.${meal}`)}</option>)}
-                </select>
+                </Select>
               </label>
               <label className="field">
                 <span>{t('services.status')}</span>
-                <select value={form.status} onChange={(e) => set('status', e.target.value as ServiceInput['status'])}>
+                <Select value={form.status} onChange={(e) => set('status', e.target.value as ServiceInput['status'])}>
                   <option value="Active">{t('serviceStatus.Active')}</option>
                   <option value="Paused">{t('serviceStatus.Paused')}</option>
                   <option value="Draft">{t('serviceStatus.Draft')}</option>
-                </select>
+                </Select>
               </label>
             </div>
 
@@ -358,11 +358,11 @@ export function ServiceEditorPage() {
               </label>
               <label className="field">
                 <span>{t('services.recurrence')}</span>
-                <select value={form.recurrence} onChange={(e) => set('recurrence', e.target.value as RecurrenceType)}>
+                <Select value={form.recurrence} onChange={(e) => set('recurrence', e.target.value as RecurrenceType)}>
                   {(['Daily', 'SpecificWeekdays', 'RamadanMode', 'OneOff'] as RecurrenceType[]).map((r) => (
                     <option key={r} value={r}>{t(`recurrence.${r}`)}</option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
 
@@ -568,10 +568,10 @@ export function ServiceEditorPage() {
           <div className="form-grid">
             <label className="field">
               <span>{t('services.bookingMode')}</span>
-              <select value={form.bookingMode} onChange={(e) => set('bookingMode', e.target.value as ServiceInput['bookingMode'])}>
+              <Select value={form.bookingMode} onChange={(e) => set('bookingMode', e.target.value as ServiceInput['bookingMode'])}>
                 <option value="Instant">{t('bookingMode.Instant')}</option>
                 <option value="Request">{t('bookingMode.Request')}</option>
-              </select>
+              </Select>
             </label>
             <label className="field">
               <span>{t('services.minAdvance')}</span>

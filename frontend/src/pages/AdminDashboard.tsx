@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
-import { Badge, EmptyState, Skeleton } from '../components/ui'
+import { Badge, EmptyState, Select, Skeleton } from '../components/ui'
 import type { AdminRestaurantSettings, PlatformBookingStats, RestaurantAdminListItem } from '../types'
 import { todayInBaghdad } from '../utils/format'
 
@@ -253,7 +253,7 @@ export function AdminDashboard() {
                       />
                     </td>
                     <td>
-                      <select
+                      <Select
                         value={edit.referredByRestaurantId ?? ''}
                         onChange={(e) =>
                           setEdits({
@@ -270,7 +270,7 @@ export function AdminDashboard() {
                               {other.restaurantName}
                             </option>
                           ))}
-                      </select>
+                      </Select>
                     </td>
                     <td>
                       <button className="btn sm" disabled={savingId === s.restaurantId} onClick={() => saveSettings(s.restaurantId)}>

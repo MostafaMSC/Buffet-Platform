@@ -6,7 +6,7 @@ import { CategoryNav, type CategoryValue } from '../components/CategoryNav'
 import { FilterPanel, activeFilterCount } from '../components/FilterPanel'
 import { SearchBar, SearchSummary, type SearchBarValue } from '../components/SearchBar'
 import { ServiceCard } from '../components/ServiceCard'
-import { CardSkeleton, EmptyState, Icon, Sheet } from '../components/ui'
+import { CardSkeleton, EmptyState, Icon, Select, Sheet } from '../components/ui'
 import type { CountryOption, SearchResults, SearchSort } from '../types'
 import { addDays, formatDate, todayInBaghdad } from '../utils/format'
 
@@ -141,15 +141,14 @@ export function Search() {
               {filterCount > 0 && <span className="badge buffet">{filterCount}</span>}
             </button>
 
-            <select
+            <Select
               className="chip"
               value={query.sort}
               onChange={(e) => patch({ sort: e.target.value })}
               aria-label={t('filters.sort')}
-              style={{ paddingInlineEnd: 'var(--sp-3)' }}
             >
               {SORTS.map((sort) => <option key={sort} value={sort}>{t(`sort.${sort}`)}</option>)}
-            </select>
+            </Select>
 
             <button
               className={`chip ${query.availability === 'Today' ? 'active' : ''}`}

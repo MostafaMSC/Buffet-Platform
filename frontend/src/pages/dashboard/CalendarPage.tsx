@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getCalendar, getDashboardServices, setSlotOverride } from '../../api/endpoints'
-import { EmptyState, Sheet, Skeleton } from '../../components/ui'
+import { EmptyState, Select, Sheet, Skeleton } from '../../components/ui'
 import type { CalendarDay, DashboardService } from '../../types'
 import { apiError, formatDate, formatTime, todayInBaghdad } from '../../utils/format'
 
@@ -74,12 +74,12 @@ export function CalendarPage() {
 
         <label className="field" style={{ width: 220 }}>
           <span className="sr-only">{t('calendar.allServices')}</span>
-          <select value={serviceId} onChange={(e) => setServiceId(e.target.value === '' ? '' : Number(e.target.value))}>
+          <Select value={serviceId} onChange={(e) => setServiceId(e.target.value === '' ? '' : Number(e.target.value))}>
             <option value="">{t('calendar.allServices')}</option>
             {services.map((s) => (
               <option key={s.id} value={s.id}>{i18n.language === 'ar' ? s.nameAr : s.name}</option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 

@@ -336,7 +336,7 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
 
 .input,
 .field input:not([type='checkbox']):not([type='radio']),
-.field select,
+.field .select-trigger,
 .field textarea {
   width: 100%;
   min-height: 44px;
@@ -351,12 +351,102 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
 
 .input:focus,
 .field input:focus,
-.field select:focus,
+.field .select-trigger:focus,
 .field textarea:focus {
   outline: none;
   border-color: var(--c-brand);
   box-shadow: 0 0 0 3px var(--c-brand-soft);
 }
+
+/* ---------------------------------------------------------------- select */
+
+/* The trigger mimics whatever control it stands in for (a .field box, a pill .chip, a
+   borderless .searchbar-field slot) — this is the bare, unstyled-context fallback. */
+.select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 44px;
+  padding: 10px var(--sp-4);
+  border: 1px solid var(--c-line-strong);
+  border-radius: var(--r-sm);
+  background: var(--c-surface);
+  color: var(--c-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+.select-trigger:hover:not(:disabled) { border-color: var(--c-ink-soft); }
+.select-trigger:focus { outline: none; border-color: var(--c-brand); box-shadow: 0 0 0 3px var(--c-brand-soft); }
+.select-trigger:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.select-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.select-chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--c-muted);
+  transform: rotate(90deg);
+  transition: transform var(--t-fast);
+}
+.select-trigger[aria-expanded='true'] .select-chevron { transform: rotate(-90deg); }
+
+/* The option list is portaled to <body> (fixed-positioned to the trigger's own rect), so
+   it renders above everything and is never clipped by a scrolling ancestor like
+   .table-wrap — the trade-off is that it has to fade/scale in on its own rather than
+   inheriting layout from a parent. */
+.select-panel {
+  position: fixed;
+  z-index: 1000;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  overflow-y: auto;
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  animation: select-pop 120ms ease-out;
+}
+@keyframes select-pop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.select-group + .select-group { margin-top: 2px; border-top: 1px solid var(--c-line); padding-top: 4px; }
+.select-group-label {
+  padding: 8px 10px 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+.select-group-options { list-style: none; margin: 0; padding: 0; }
+
+.select-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  font-size: 0.9rem;
+  color: var(--c-ink);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.select-option svg { visibility: hidden; flex-shrink: 0; color: var(--c-gold-dark); }
+.select-option.selected { font-weight: 600; background: var(--c-brand-soft); }
+.select-option.selected svg { visibility: visible; }
+.select-option.active:not(.disabled) { background: var(--c-surface-alt); }
+.select-option.selected.active { background: var(--c-brand-soft); filter: brightness(0.97); }
+.select-option.disabled { color: var(--c-muted); cursor: not-allowed; }
+
+/* A select can also stand in as a .chip (the sort control) — restore the pill look the
+   base trigger's box styling would otherwise flatten. */
+.select-trigger.chip { width: auto; min-height: 38px; padding: 0 var(--sp-4); border-radius: var(--r-pill); font-size: 0.86rem; }
 
 .field-error { color: var(--c-bad); font-size: 0.8rem; }
 
@@ -624,7 +714,7 @@ html[dir='rtl'] .searchbar-field + .searchbar-field { box-shadow: inset -1px 0 0
 .searchbar-field .value { font-size: 0.88rem; color: var(--c-muted); }
 .searchbar-field .value.filled { color: var(--c-ink); font-weight: 500; }
 
-.searchbar-field select,
+.searchbar-field .select-trigger,
 .searchbar-field input {
   border: 0;
   background: transparent;
@@ -635,18 +725,18 @@ html[dir='rtl'] .searchbar-field + .searchbar-field { box-shadow: inset -1px 0 0
   width: 100%;
   color: var(--c-ink);
 }
-.searchbar-field select:focus,
+.searchbar-field .select-trigger:focus,
 .searchbar-field input:focus { outline: none; box-shadow: none; }
 
 /* The "Where" field: a city select, plus an area select that appears once a city with
    neighborhoods is chosen. Both share the row rather than claiming a grid column each. */
 .where-controls { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.where-controls select { width: auto; min-width: 0; flex: 1 1 0; }
-.where-controls select:nth-child(2) {
+.where-controls .select-trigger { width: auto; min-width: 0; flex: 1 1 0; }
+.where-controls .select-trigger:nth-child(2) {
   padding-inline-start: 6px;
   box-shadow: inset 1px 0 0 var(--c-line);
 }
-html[dir='rtl'] .where-controls select:nth-child(2) { box-shadow: inset -1px 0 0 var(--c-line); }
+html[dir='rtl'] .where-controls .select-trigger:nth-child(2) { box-shadow: inset -1px 0 0 var(--c-line); }
 
 .searchbar .btn { align-self: center; margin-inline-start: var(--sp-2); }
 
@@ -666,8 +756,8 @@ html[dir='rtl'] .where-controls select:nth-child(2) { box-shadow: inset -1px 0 0
      and stacks the two controls instead of sitting them side by side. */
   .searchbar-field:first-child { grid-column: 1 / -1; }
   .where-controls { flex-wrap: wrap; }
-  .where-controls select { flex-basis: 100%; }
-  .where-controls select:nth-child(2) {
+  .where-controls .select-trigger { flex-basis: 100%; }
+  .where-controls .select-trigger:nth-child(2) {
     box-shadow: none;
     padding-inline-start: 0;
     padding-top: 4px;

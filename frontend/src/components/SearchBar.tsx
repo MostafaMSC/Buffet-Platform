@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { getLocations } from '../api/endpoints'
 import type { CountryOption } from '../types'
 import { formatDate, todayInBaghdad } from '../utils/format'
-import { Icon } from './ui'
+import { Icon, Select } from './ui'
 
 export interface SearchBarValue {
   city: string
@@ -51,7 +51,7 @@ export function SearchBar({
         {/* An area is a refinement of a city, so it only appears once a city narrows the
             list enough for "which neighborhood" to be a meaningful question. */}
         <div className="where-controls">
-          <select
+          <Select
             value={value.city}
             onChange={(e) => onChange({ ...value, city: e.target.value, areaId: undefined })}
             aria-label={t('search.where')}
@@ -62,9 +62,9 @@ export function SearchBar({
                 {i18n.language === 'ar' ? city.nameAr : city.nameEn}
               </option>
             ))}
-          </select>
+          </Select>
           {areas.length > 0 && (
-            <select
+            <Select
               value={value.areaId ?? ''}
               onChange={(e) => onChange({ ...value, areaId: e.target.value ? Number(e.target.value) : undefined })}
               aria-label={t('search.area')}
@@ -75,7 +75,7 @@ export function SearchBar({
                   {i18n.language === 'ar' ? area.nameAr : area.nameEn}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
         </div>
       </label>
@@ -94,7 +94,7 @@ export function SearchBar({
       {!compact && (
         <label className="searchbar-field">
           <span className="label">{t('search.time')}</span>
-          <select
+          <Select
             value={value.time}
             onChange={(e) => onChange({ ...value, time: e.target.value })}
             aria-label={t('search.time')}
@@ -104,13 +104,13 @@ export function SearchBar({
                 {time || t('search.anyTime')}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
 
       <label className="searchbar-field">
         <span className="label">{t('search.guests')}</span>
-        <select
+        <Select
           value={value.guests}
           onChange={(e) => onChange({ ...value, guests: Number(e.target.value) })}
           aria-label={t('search.guests')}
@@ -118,7 +118,7 @@ export function SearchBar({
           {Array.from({ length: 20 }, (_, i) => i + 1).map((n) => (
             <option key={n} value={n}>{t('search.guestCount', { count: n })}</option>
           ))}
-        </select>
+        </Select>
       </label>
 
       <button className="btn square" type="submit" aria-label={t('search.action')}>

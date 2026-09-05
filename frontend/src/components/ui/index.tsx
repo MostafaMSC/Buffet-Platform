@@ -1,5 +1,244 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import {
+  Children,
+  isValidElement,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+
+/* ---------------------------------------------------------------- select */
+
+interface SelectOption { value: string; label: ReactNode; disabled?: boolean }
+interface SelectGroup { label: string; options: SelectOption[] }
+type SelectEntry = SelectOption | SelectGroup
+
+function isGroup(entry: SelectEntry): entry is SelectGroup {
+  return 'options' in entry
+}
+
+/// Reads a <Select>'s children exactly as if it were a native <select> — plain <option>s
+/// and grouping <optgroup>s — so call sites never have to learn a different options shape.
+function parseChildren(children: ReactNode): SelectEntry[] {
+  const entries: SelectEntry[] = []
+  Children.forEach(children, (child) => {
+    if (!isValidElement(child)) return
+    const props = child.props as { value?: string | number; children?: ReactNode; disabled?: boolean; label?: string }
+    if (child.type === 'optgroup') {
+      const options: SelectOption[] = []
+      Children.forEach(props.children, (opt) => {
+        if (!isValidElement(opt)) return
+        const optProps = opt.props as { value?: string | number; children?: ReactNode; disabled?: boolean }
+        options.push({ value: String(optProps.value ?? ''), label: optProps.children, disabled: optProps.disabled })
+      })
+      entries.push({ label: props.label ?? '', options })
+    } else if (child.type === 'option') {
+      entries.push({ value: String(props.value ?? ''), label: props.children, disabled: props.disabled })
+    }
+  })
+  return entries
+}
+
+function flattenOptions(entries: SelectEntry[]): SelectOption[] {
+  return entries.flatMap((entry) => (isGroup(entry) ? entry.options : [entry]))
+}
+
+/// A themeable stand-in for the native <select>: same value/onChange/<option> children
+/// contract (so it drops into any existing form untouched), but the option list is our
+/// own markup — portaled to <body> so it always escapes a scrolling ancestor like
+/// .table-wrap instead of being clipped by it.
+export function Select({
+  value,
+  onChange,
+  children,
+  className,
+  disabled,
+  style,
+  'aria-label': ariaLabel,
+  'aria-required': ariaRequired,
+}: {
+  value: string | number | undefined
+  onChange: (e: { target: { value: string } }) => void
+  children: ReactNode
+  className?: string
+  disabled?: boolean
+  style?: CSSProperties
+  'aria-label'?: string
+  'aria-required'?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({})
+  const [activeValue, setActiveValue] = useState<string | null>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLUListElement>(null)
+  const listboxId = useId()
+
+  const entries = useMemo(() => parseChildren(children), [children])
+  const flat = useMemo(() => flattenOptions(entries), [entries])
+  const currentValue = String(value ?? '')
+  const selected = flat.find((o) => o.value === currentValue)
+
+  const positionPanel = () => {
+    const trigger = triggerRef.current
+    if (!trigger) return
+    const rect = trigger.getBoundingClientRect()
+    const maxHeight = 280
+    const spaceBelow = window.innerHeight - rect.bottom
+    const openUp = spaceBelow < maxHeight && rect.top > spaceBelow
+    // A chip-style trigger (the sort control) is only as wide as its own label, but the
+    // panel still has to fit its longest option — so it's given a floor, not a fixed
+    // width, and grows from whichever edge keeps it on screen.
+    const isRtl = getComputedStyle(trigger).direction === 'rtl'
+    setPanelStyle({
+      position: 'fixed',
+      minWidth: rect.width,
+      maxWidth: window.innerWidth - 16,
+      ...(isRtl ? { right: window.innerWidth - rect.right } : { left: rect.left }),
+      ...(openUp
+        ? { bottom: window.innerHeight - rect.top + 4, maxHeight: Math.min(maxHeight, rect.top - 8) }
+        : { top: rect.bottom + 4, maxHeight: Math.min(maxHeight, spaceBelow - 8) }),
+    })
+  }
+
+  const closePanel = () => setOpen(false)
+
+  const openPanel = () => {
+    if (disabled || flat.length === 0) return
+    positionPanel()
+    setActiveValue(flat.find((o) => o.value === currentValue && !o.disabled)?.value ?? flat.find((o) => !o.disabled)?.value ?? null)
+    setOpen(true)
+  }
+
+  useEffect(() => {
+    if (!open) return
+    const onDocMouseDown = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (triggerRef.current?.contains(target)) return
+      if (panelRef.current?.contains(target)) return
+      closePanel()
+    }
+    // A capture-phase window listener sees every scroll, including the panel's own list
+    // scrolling past a long option set — that one must not close it.
+    const onScroll = (e: Event) => {
+      if (panelRef.current?.contains(e.target as Node)) return
+      closePanel()
+    }
+    const onResize = () => closePanel()
+    document.addEventListener('mousedown', onDocMouseDown)
+    window.addEventListener('scroll', onScroll, true)
+    window.addEventListener('resize', onResize)
+    return () => {
+      document.removeEventListener('mousedown', onDocMouseDown)
+      window.removeEventListener('scroll', onScroll, true)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [open])
+
+  useEffect(() => {
+    if (!open) return
+    panelRef.current?.querySelector('.select-option.selected')?.scrollIntoView({ block: 'nearest' })
+  }, [open])
+
+  const selectValue = (val: string) => {
+    onChange({ target: { value: val } })
+    closePanel()
+    triggerRef.current?.focus()
+  }
+
+  const moveActive = (dir: 1 | -1) => {
+    const enabled = flat.filter((o) => !o.disabled)
+    if (enabled.length === 0) return
+    const idx = enabled.findIndex((o) => o.value === activeValue)
+    const next = enabled[(idx + dir + enabled.length) % enabled.length]
+    setActiveValue(next.value)
+  }
+
+  const onTriggerKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (disabled) return
+    if (!open) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        openPanel()
+      }
+      return
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(1) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveActive(-1) }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (activeValue != null) selectValue(activeValue) }
+    else if (e.key === 'Escape') { e.preventDefault(); closePanel() }
+    else if (e.key === 'Tab') closePanel()
+  }
+
+  const optionId = (val: string) => `${listboxId}-${encodeURIComponent(val)}`
+
+  const renderOption = (opt: SelectOption) => {
+    // A disabled option (the AreaSelect placeholder, say) can be the current value before
+    // a real choice is made, but it isn't a selection — don't dress it up as one.
+    const isSelected = opt.value === currentValue && !opt.disabled
+    const isActive = opt.value === activeValue
+    return (
+      <li
+        key={opt.value}
+        id={optionId(opt.value)}
+        role="option"
+        aria-selected={isSelected}
+        aria-disabled={opt.disabled}
+        className={`select-option${isSelected ? ' selected' : ''}${isActive ? ' active' : ''}${opt.disabled ? ' disabled' : ''}`}
+        onMouseEnter={() => !opt.disabled && setActiveValue(opt.value)}
+        onClick={() => !opt.disabled && selectValue(opt.value)}
+      >
+        <Icon name="check" size={14} />
+        <span>{opt.label}</span>
+      </li>
+    )
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        ref={triggerRef}
+        className={`select-trigger${className ? ` ${className}` : ''}`}
+        style={style}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-required={ariaRequired}
+        aria-label={ariaLabel}
+        aria-activedescendant={open && activeValue != null ? optionId(activeValue) : undefined}
+        onClick={() => (open ? closePanel() : openPanel())}
+        onKeyDown={onTriggerKeyDown}
+      >
+        <span className="select-value">{selected ? selected.label : currentValue}</span>
+        <span className="select-chevron"><Icon name="chevron" size={14} /></span>
+      </button>
+      {open &&
+        createPortal(
+          <ul className="select-panel" role="listbox" ref={panelRef} id={listboxId} aria-label={ariaLabel} style={panelStyle}>
+            {entries.map((entry, i) =>
+              isGroup(entry) ? (
+                <li key={`group-${i}`} role="presentation" className="select-group">
+                  <div className="select-group-label">{entry.label}</div>
+                  <ul role="group" aria-label={entry.label} className="select-group-options">
+                    {entry.options.map(renderOption)}
+                  </ul>
+                </li>
+              ) : (
+                renderOption(entry)
+              ),
+            )}
+          </ul>,
+          document.body,
+        )}
+    </>
+  )
+}
 
 /* ---------------------------------------------------------------- rating */
 
