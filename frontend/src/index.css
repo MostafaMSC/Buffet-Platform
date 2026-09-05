@@ -490,9 +490,21 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--c-line);
+  /* Tones lifted from the logo artwork's own backdrop, lit the way the artwork is:
+     bright where the badge sits, deepening toward the far edge. The badge itself is
+     cut out onto transparency (logo-mark.webp), so the two meet with no seam. */
+  background:
+    radial-gradient(125% 190% at 8% -10%, rgba(255, 249, 236, 0.62), rgba(255, 249, 236, 0) 58%),
+    linear-gradient(105deg, #dccbb2 0%, #c9b394 34%, #bb9f80 68%, #ae9271 100%);
+  border-bottom: 1px solid rgba(43, 39, 35, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 250, 240, 0.4);
+}
+
+/* Mirror the light source with the layout, so the bright end still sits under the badge. */
+html[dir='rtl'] .site-header {
+  background:
+    radial-gradient(125% 190% at 92% -10%, rgba(255, 249, 236, 0.62), rgba(255, 249, 236, 0) 58%),
+    linear-gradient(255deg, #dccbb2 0%, #c9b394 34%, #bb9f80 68%, #ae9271 100%);
 }
 
 .site-header > .container {
@@ -509,7 +521,9 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   display: inline-flex; align-items: center; gap: var(--sp-2);
   min-width: 0;
 }
-.brand-logo { height: 64px; width: auto; display: block; }
+/* The mark is a square badge now that its backdrop is cut away, so it needs more
+   height than the old wide crop did to carry the same presence in the bar. */
+.brand-logo { height: 74px; width: auto; display: block; }
 
 .nav { display: flex; align-items: center; gap: var(--sp-1); flex-shrink: 0; }
 
@@ -522,19 +536,21 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   border-radius: var(--r-pill);
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--c-ink-soft);
+  /* Darker than --c-ink-soft, which only clears AA against the app's near-white
+     surfaces — this holds 4.8:1 even against the deepest end of the header gradient. */
+  color: #2b2723;
   background: transparent;
   border: 0;
   transition: background var(--t-fast), color var(--t-fast);
 }
-.nav-link:hover { background: var(--c-surface-alt); color: var(--c-ink); }
-.nav-link.active { color: var(--c-ink); }
+.nav-link:hover { background: rgba(255, 250, 240, 0.5); color: #14100c; }
+.nav-link.active { color: #14100c; }
 
 .nav-link.outlined {
-  border: 1px solid var(--c-line-strong);
+  border: 1px solid rgba(43, 39, 35, 0.38);
   padding-inline: var(--sp-4);
 }
-.nav-link.outlined:hover { border-color: var(--c-ink-soft); }
+.nav-link.outlined:hover { border-color: rgba(43, 39, 35, 0.7); }
 
 @media (max-width: 860px) {
   .nav .desktop-only { display: none; }
@@ -544,7 +560,9 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
    a signed-in owner has two extra entries and the row must still fit. */
 @media (max-width: 560px) {
   .site-header > .container { gap: var(--sp-2); }
-  .brand-logo { height: 48px; }
+  /* The square mark costs far less width than the old wide crop, so it gives up
+     less height here than it used to. */
+  .brand-logo { height: 58px; }
   .nav { gap: 0; }
   .nav-link { padding-inline: var(--sp-2); }
   .nav-link.outlined { padding-inline: var(--sp-3); }

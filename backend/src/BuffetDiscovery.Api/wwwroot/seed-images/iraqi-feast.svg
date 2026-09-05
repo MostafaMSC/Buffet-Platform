@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Iraqi quzi feast: roasted lamb over saffron rice with nuts">
+  <title>Iraqi Feast — Quzi &amp; Rice</title>
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3d6"/>
+      <stop offset="1" stop-color="#f0c878"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg5)"/>
+
+  <!-- large platter -->
+  <ellipse cx="450" cy="360" rx="360" ry="150" fill="#ffffff" stroke="#e3c48a" stroke-width="8"/>
+  <ellipse cx="450" cy="350" rx="320" ry="120" fill="#f6e3ae"/>
+
+  <!-- saffron rice mound -->
+  <ellipse cx="450" cy="330" rx="270" ry="90" fill="#f4c542"/>
+  <g fill="#f7d878">
+    <circle cx="330" cy="310" r="7"/><circle cx="380" cy="295" r="7"/><circle cx="430" cy="300" r="7"/>
+    <circle cx="480" cy="290" r="7"/><circle cx="530" cy="305" r="7"/><circle cx="570" cy="320" r="7"/>
+    <circle cx="360" cy="330" r="7"/><circle cx="410" cy="335" r="7"/><circle cx="500" cy="330" r="7"/>
+    <circle cx="550" cy="340" r="7"/><circle cx="300" cy="335" r="7"/>
+  </g>
+
+  <!-- lamb shank centerpiece -->
+  <g transform="translate(450,290)">
+    <path d="M -70 30 Q -90 -20 -30 -50 Q 40 -75 90 -30 Q 110 0 70 30 Q 30 55 -30 55 Q -60 55 -70 30 Z" fill="#9a5a2c"/>
+    <path d="M -50 15 Q -20 -20 40 -25" stroke="#7a3f18" stroke-width="6" fill="none" opacity="0.6"/>
+    <ellipse cx="80" cy="-10" rx="18" ry="10" fill="#c9c9c9"/>
+  </g>
+
+  <!-- almonds / nuts garnish -->
+  <g fill="#c98a3a">
+    <ellipse cx="250" cy="360" rx="10" ry="6"/>
+    <ellipse cx="620" cy="365" rx="10" ry="6"/>
+    <ellipse cx="270" cy="390" rx="10" ry="6"/>
+    <ellipse cx="600" cy="395" rx="10" ry="6"/>
+  </g>
+
+  <!-- raisins -->
+  <g fill="#4a2a1a">
+    <circle cx="380" cy="380" r="6"/><circle cx="520" cy="375" r="6"/><circle cx="450" cy="395" r="6"/>
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Charcoal mixed grill platter with kebab, kofta and shish tawook">
+  <title>Mixed Grill Platter</title>
+  <defs>
+    <radialGradient id="bg4" cx="50%" cy="35%" r="75%">
+      <stop offset="0" stop-color="#4a2a1a"/>
+      <stop offset="1" stop-color="#241008"/>
+    </radialGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg4)"/>
+
+  <!-- grill grate glow -->
+  <g stroke="#ff7a3c" stroke-width="10" opacity="0.55">
+    <line x1="120" y1="480" x2="780" y2="480"/>
+    <line x1="120" y1="510" x2="780" y2="510"/>
+  </g>
+  <g stroke="#ffb347" stroke-width="3" opacity="0.4">
+    <line x1="180" y1="460" x2="180" y2="530"/>
+    <line x1="300" y1="460" x2="300" y2="530"/>
+    <line x1="450" y1="460" x2="450" y2="530"/>
+    <line x1="600" y1="460" x2="600" y2="530"/>
+    <line x1="720" y1="460" x2="720" y2="530"/>
+  </g>
+
+  <!-- skewer 1: kebab chunks -->
+  <line x1="150" y1="260" x2="420" y2="220" stroke="#c8c8c8" stroke-width="6"/>
+  <g fill="#8a3a24">
+    <ellipse cx="200" cy="253" rx="30" ry="22" transform="rotate(-8 200 253)"/>
+    <ellipse cx="270" cy="243" rx="30" ry="22" transform="rotate(-8 270 243)"/>
+    <ellipse cx="340" cy="233" rx="30" ry="22" transform="rotate(-8 340 233)"/>
+  </g>
+  <g fill="#5c2515" opacity="0.5">
+    <ellipse cx="195" cy="248" rx="10" ry="6"/>
+    <ellipse cx="265" cy="238" rx="10" ry="6"/>
+    <ellipse cx="335" cy="228" rx="10" ry="6"/>
+  </g>
+
+  <!-- skewer 2: shish tawook -->
+  <line x1="420" y1="330" x2="720" y2="300" stroke="#c8c8c8" stroke-width="6"/>
+  <g fill="#e8b866">
+    <rect x="450" y="300" width="55" height="45" rx="10" transform="rotate(-5 477 322)"/>
+    <rect x="540" y="292" width="55" height="45" rx="10" transform="rotate(-5 567 314)"/>
+    <rect x="630" y="284" width="55" height="45" rx="10" transform="rotate(-5 657 306)"/>
+  </g>
+  <g fill="#c8451f" opacity="0.55">
+    <rect x="460" y="310" width="34" height="10" rx="4"/>
+    <rect x="550" y="302" width="34" height="10" rx="4"/>
+    <rect x="640" y="294" width="34" height="10" rx="4"/>
+  </g>
+
+  <!-- kofta row -->
+  <g fill="#7a3218">
+    <ellipse cx="250" cy="400" rx="60" ry="24"/>
+    <ellipse cx="400" cy="415" rx="60" ry="24"/>
+    <ellipse cx="550" cy="405" rx="60" ry="24"/>
+  </g>
+  <g fill="#a04b28" opacity="0.6">
+    <ellipse cx="250" cy="394" rx="46" ry="14"/>
+    <ellipse cx="400" cy="409" rx="46" ry="14"/>
+    <ellipse cx="550" cy="399" rx="46" ry="14"/>
+  </g>
+
+  <!-- smoke -->
+  <g stroke="#eee" stroke-width="10" fill="none" opacity="0.15" stroke-linecap="round">
+    <path d="M 300 150 q 20 -40 -10 -70 q -20 -25 10 -55"/>
+    <path d="M 560 130 q 25 -35 0 -70 q -20 -20 5 -50"/>
+  </g>
+</svg>

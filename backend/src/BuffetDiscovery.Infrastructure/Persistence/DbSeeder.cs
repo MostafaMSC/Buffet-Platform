@@ -19,6 +19,10 @@ public static class DbSeeder
     private static string Photo(string seed, int w = 900, int h = 600) =>
         $"https://picsum.photos/seed/{Uri.EscapeDataString(seed)}/{w}/{h}";
 
+    /// Buffet/set-menu photos are local illustrations keyed to what the service actually serves
+    /// (see the PhotoThemes on each SeedService below), rather than a name-seeded stock photo.
+    private static string FoodPhoto(string theme) => $"/seed-images/{theme}.svg";
+
     // ---------------------------------------------------------------- locations
 
     private static async Task SeedLocationsAsync(AppDbContext db)
@@ -147,6 +151,7 @@ public static class DbSeeder
         RecurrenceType Recurrence,
         int? Capacity,
         SeedMenu[] Menu,
+        string[] PhotoThemes,
         string[]? Weekdays = null,
         int? DurationMinutes = null,
         PricingModel Pricing = PricingModel.PerPerson,
@@ -235,12 +240,9 @@ public static class DbSeeder
                     BookingMode = s.BookingMode,
                     Capacity = s.Slots is null ? s.Capacity : null,
                     Status = ServiceStatus.Active,
-                    Photos =
-                    [
-                        new ServicePhoto { Url = Photo($"{seed.Name}-{s.Name}-1"), SortOrder = 0 },
-                        new ServicePhoto { Url = Photo($"{seed.Name}-{s.Name}-2"), SortOrder = 1 },
-                        new ServicePhoto { Url = Photo($"{seed.Name}-{s.Name}-3"), SortOrder = 2 },
-                    ]
+                    Photos = s.PhotoThemes
+                        .Select((theme, idx) => new ServicePhoto { Url = FoodPhoto(theme), SortOrder = idx })
+                        .ToList()
                 };
 
                 var sectionOrder = 0;
@@ -325,6 +327,7 @@ public static class DbSeeder
                         new("Live Stations", "الأركان الحية",
                             [("Omelette Station", "ركن العجة", DietaryTags.Vegetarian), ("Pancake Bar", "ركن البان كيك", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["breakfast-international", "breakfast-levantine", "weekend-buffet-hall"],
                     DurationMinutes: 120, FreeUnderAge: 6,
                     Slots: [("07:00", "08:30", 60), ("08:30", "10:30", 60)]),
 
@@ -341,6 +344,7 @@ public static class DbSeeder
                         new("Desserts", "الحلويات",
                             [("Kunafa", "كنافة", DietaryTags.Vegetarian), ("Baklava", "بقلاوة", DietaryTags.Vegetarian), ("Seasonal Fruit", "فواكه موسمية", DietaryTags.Vegan)]),
                     ],
+                    PhotoThemes: ["iraqi-feast", "mixed-grill", "dessert-arabic"],
                     DurationMinutes: 180, FreeUnderAge: 5, MaxGuests: 20,
                     Slots: [("13:00", "15:00", 80), ("15:00", "17:00", 80)]),
 
@@ -354,6 +358,7 @@ public static class DbSeeder
                         new("Main", "الطبق الرئيسي", [("Grilled Chicken", "دجاج مشوي", DietaryTags.Halal), ("Beef Stroganoff", "ستروغانوف اللحم", DietaryTags.Halal), ("Mushroom Risotto", "ريزوتو الفطر", DietaryTags.Vegetarian)]),
                         new("Dessert", "الحلوى", [("Chocolate Fondant", "فوندان الشوكولاتة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["mezze-cold", "business-lunch", "dessert-arabic"],
                     Weekdays: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
                     DurationMinutes: 60, MinGuests: 1, MaxGuests: 8),
             ],
@@ -381,6 +386,7 @@ public static class DbSeeder
                         new("Main Courses", "الأطباق الرئيسية", [("Lamb Quzi", "قوزي غنم", DietaryTags.Halal), ("Chicken Machboos", "مجبوس دجاج", DietaryTags.Halal), ("Grilled River Fish", "سمك نهري مشوي", DietaryTags.Halal)]),
                         new("Ramadan Sweets", "حلويات رمضان", [("Zalabia", "زلابية", DietaryTags.Vegetarian), ("Qatayef", "قطايف", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["iftar-table", "iraqi-feast", "dessert-arabic"],
                     DurationMinutes: 150, FreeUnderAge: 6,
                     Slots: [("18:30", "20:00", 120), ("20:00", "21:30", 90)]),
 
@@ -395,6 +401,7 @@ public static class DbSeeder
                         new("Dessert", "الحلوى", [("New York Cheesecake", "تشيز كيك", DietaryTags.Vegetarian)]),
                         new("Drinks", "المشروبات", [("Two Soft Drinks", "مشروبان غازيان", DietaryTags.Vegan), ("Arabic Coffee", "قهوة عربية", DietaryTags.Vegan)]),
                     ],
+                    PhotoThemes: ["romantic-dinner", "business-lunch"],
                     DurationMinutes: 120, Pricing: PricingModel.PerPackage, PackagePrice: 70000, PackageGuests: 2,
                     MinGuests: 2, MaxGuests: 2, BookingMode: BookingMode.Request),
             ],
@@ -420,6 +427,7 @@ public static class DbSeeder
                         new("Sides", "الأطباق الجانبية", [("Timman Bagilla", "تمن باقلاء", DietaryTags.Vegetarian), ("Grilled Vegetables", "خضار مشوية", DietaryTags.Vegan)]),
                         new("Desserts", "الحلويات", [("Halawat Al-Jibn", "حلاوة الجبن", DietaryTags.Vegetarian), ("Ice Cream Bar", "ركن المثلجات", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["mixed-grill", "rice-sides", "dessert-arabic"],
                     Weekdays: ["Friday", "Saturday"], DurationMinutes: 150, FreeUnderAge: 5,
                     Slots: [("12:30", "14:15", 20), ("14:15", "16:00", 20)]),
             ],
@@ -444,6 +452,7 @@ public static class DbSeeder
                         new("From the Oven", "من الفرن", [("Zaatar Manakish", "منقوشة زعتر", DietaryTags.Vegan), ("Cheese Manakish", "منقوشة جبنة", DietaryTags.Vegetarian)]),
                         new("Sweet", "الحلو", [("Mountain Honey & Cream", "عسل جبلي وقشطة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["breakfast-levantine", "breakfast-iraqi"],
                     DurationMinutes: 120, FreeUnderAge: 6),
 
                 new(ServiceType.SetMenu, "Kurdish Tasting Menu", "قائمة التذوق الكردية",
@@ -457,6 +466,7 @@ public static class DbSeeder
                         new("Main", "الطبق الرئيسي", [("Slow-cooked Lamb Shank", "موزة غنم مطهوة ببطء", DietaryTags.Halal)]),
                         new("Dessert", "الحلوى", [("Rice Pudding with Pistachio", "رز بحليب بالفستق", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["kurdish-lamb", "dessert-arabic"],
                     DurationMinutes: 120, MinGuests: 2, MaxGuests: 10),
             ],
             [
@@ -481,6 +491,7 @@ public static class DbSeeder
                         new("Sides", "الأطباق الجانبية", [("Saffron Rice", "رز بالزعفران", DietaryTags.Vegan), ("Grilled Tomato Salad", "سلطة طماطم مشوية", DietaryTags.Vegan)]),
                         new("Desserts", "الحلويات", [("Date Cake", "كيك التمر", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["grilled-fish", "seafood-platter", "rice-sides"],
                     Weekdays: ["Thursday", "Friday", "Saturday"], DurationMinutes: 150, FreeUnderAge: 5,
                     Slots: [("18:00", "20:00", 50), ("20:00", "22:00", 50)]),
 
@@ -493,6 +504,7 @@ public static class DbSeeder
                         new("The Platter", "الطبق", [("Mixed Grilled Fish", "سمك مشوي مشكل", DietaryTags.Halal), ("Shrimp Machboos", "مجبوس روبيان", DietaryTags.Halal), ("Fresh Salads", "سلطات طازجة", DietaryTags.Vegan)]),
                         new("Included", "يشمل", [("Bread Basket", "سلة خبز", DietaryTags.Vegan), ("Four Soft Drinks", "أربعة مشروبات غازية", DietaryTags.Vegan)]),
                     ],
+                    PhotoThemes: ["seafood-platter", "rice-sides"],
                     DurationMinutes: 90, Pricing: PricingModel.PerPackage, PackagePrice: 95000, PackageGuests: 4,
                     MinGuests: 4, MaxGuests: 4),
             ],
@@ -517,6 +529,7 @@ public static class DbSeeder
                         new("Sides", "الأطباق الجانبية", [("Timman", "تمن", DietaryTags.Vegan), ("Torshi", "طرشي", DietaryTags.Vegan)]),
                         new("Desserts", "الحلويات", [("Zarda", "زردة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["iraqi-feast", "rice-sides", "dessert-arabic"],
                     DurationMinutes: 90, FreeUnderAge: 6),
             ],
             [
@@ -540,6 +553,7 @@ public static class DbSeeder
                         new("Main Courses", "الأطباق الرئيسية", [("Chicken Biryani", "برياني دجاج", DietaryTags.Halal), ("Beef Tashreeb", "تشريب لحم", DietaryTags.Halal)]),
                         new("Desserts", "الحلويات", [("Kleicha", "كليجة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["iftar-table", "biryani-tashreeb", "dessert-arabic"],
                     DurationMinutes: 120, MinGuests: 1, MaxGuests: 60, FreeUnderAge: 6,
                     Slots: [("18:00", "19:15", 200), ("19:15", "20:30", 200)]),
 
@@ -553,6 +567,7 @@ public static class DbSeeder
                         new("Main", "الطبق الرئيسي", [("Chicken & Rice", "دجاج ورز", DietaryTags.Halal)]),
                         new("Dessert", "الحلوى", [("Seasonal Fruit", "فواكه موسمية", DietaryTags.Vegan)]),
                     ],
+                    PhotoThemes: ["chicken-rice", "mezze-cold"],
                     DurationMinutes: 60, MinGuests: 10, MaxGuests: 80, BookingMode: BookingMode.Request),
             ],
             [
@@ -576,6 +591,7 @@ public static class DbSeeder
                         new("Main Courses", "الأطباق الرئيسية", [("Grilled Chicken", "دجاج مشوي", DietaryTags.Halal), ("Beef Kebab", "كباب لحم", DietaryTags.Halal), ("Pasta Bake", "معكرونة بالفرن", DietaryTags.Vegetarian)]),
                         new("Desserts", "الحلويات", [("Basbousa", "بسبوسة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["mixed-grill", "mezze-cold", "dessert-arabic"],
                     Weekdays: ["Thursday", "Friday", "Saturday"], DurationMinutes: 120, FreeUnderAge: 5),
 
                 new(ServiceType.SetMenu, "Family Set Menu", "القائمة العائلية",
@@ -588,6 +604,7 @@ public static class DbSeeder
                         new("Mains to Share", "أطباق للمشاركة", [("Mixed Grill Platter", "طبق مشاوي مشكل", DietaryTags.Halal), ("Chicken Biryani", "برياني دجاج", DietaryTags.Halal)]),
                         new("Dessert", "الحلوى", [("Kunafa to Share", "كنافة للمشاركة", DietaryTags.Vegetarian)]),
                     ],
+                    PhotoThemes: ["family-share-grill", "dessert-arabic"],
                     DurationMinutes: 90, Pricing: PricingModel.PerPackage, PackagePrice: 60000, PackageGuests: 4,
                     MinGuests: 4, MaxGuests: 6),
             ],
@@ -612,6 +629,7 @@ public static class DbSeeder
                         new("The Table", "المائدة", [("Geymar & Honey", "قيمر وعسل", DietaryTags.Vegetarian), ("Fresh Samoon", "صمون طازج", DietaryTags.Vegan), ("Eggs to Order", "بيض حسب الطلب", DietaryTags.Vegetarian), ("Fried Kahi", "كاهي", DietaryTags.Vegetarian)]),
                         new("Drinks", "المشروبات", [("Iraqi Tea", "چاي عراقي", DietaryTags.Vegan)]),
                     ],
+                    PhotoThemes: ["breakfast-iraqi"],
                     DurationMinutes: 75, FreeUnderAge: 5),
             ],
             [

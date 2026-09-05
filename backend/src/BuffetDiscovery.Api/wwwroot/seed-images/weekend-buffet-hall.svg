@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Wide buffet table spread with multiple serving dishes">
+  <title>Buffet Table Spread</title>
+  <defs>
+    <linearGradient id="bg18" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdf3e3"/>
+      <stop offset="1" stop-color="#f0d8a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg18)"/>
+
+  <!-- table cloth -->
+  <rect x="60" y="380" width="780" height="140" rx="16" fill="#ffffff" opacity="0.7"/>
+
+  <!-- row of serving dishes -->
+  <g transform="translate(160,420)">
+    <ellipse rx="70" ry="26" fill="#ffffff" stroke="#e8d29a" stroke-width="4"/>
+    <ellipse cy="-6" rx="52" ry="16" fill="#c8451f"/>
+  </g>
+  <g transform="translate(320,410)">
+    <ellipse rx="70" ry="26" fill="#ffffff" stroke="#e8d29a" stroke-width="4"/>
+    <ellipse cy="-6" rx="52" ry="16" fill="#f4c542"/>
+  </g>
+  <g transform="translate(480,420)">
+    <ellipse rx="70" ry="26" fill="#ffffff" stroke="#e8d29a" stroke-width="4"/>
+    <ellipse cy="-6" rx="52" ry="16" fill="#7ea34a"/>
+  </g>
+  <g transform="translate(640,410)">
+    <ellipse rx="70" ry="26" fill="#ffffff" stroke="#e8d29a" stroke-width="4"/>
+    <ellipse cy="-6" rx="52" ry="16" fill="#9a5a2c"/>
+  </g>
+  <g transform="translate(770,425)">
+    <ellipse rx="55" ry="20" fill="#ffffff" stroke="#e8d29a" stroke-width="4"/>
+    <ellipse cy="-5" rx="40" ry="12" fill="#e8a53c"/>
+  </g>
+
+  <!-- chafing dish lids in back row -->
+  <g fill="#d8d8d8" opacity="0.85">
+    <path d="M 220 300 a 60 40 0 0 1 120 0 Z"/>
+    <path d="M 460 290 a 60 40 0 0 1 120 0 Z"/>
+  </g>
+  <g fill="#bfbfbf">
+    <rect x="270" y="290" width="20" height="16" rx="4"/>
+    <rect x="510" y="280" width="20" height="16" rx="4"/>
+  </g>
+
+  <!-- hanging pendant lights -->
+  <g stroke="#c8a25a" stroke-width="3">
+    <line x1="200" y1="0" x2="200" y2="120"/>
+    <line x1="450" y1="0" x2="450" y2="100"/>
+    <line x1="700" y1="0" x2="700" y2="130"/>
+  </g>
+  <g fill="#f4d878">
+    <circle cx="200" cy="130" r="16"/>
+    <circle cx="450" cy="110" r="16"/>
+    <circle cx="700" cy="140" r="16"/>
+  </g>
+</svg>

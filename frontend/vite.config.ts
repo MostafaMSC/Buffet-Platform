@@ -14,6 +14,10 @@ export default defineConfig({
         target: 'http://localhost:5080',
         changeOrigin: true,
       },
+      '/seed-images': {
+        target: 'http://localhost:5080',
+        changeOrigin: true,
+      },
     },
   },
 })
