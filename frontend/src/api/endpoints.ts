@@ -10,6 +10,7 @@ import type {
   MyLookupResult,
   RestaurantBookingGroup,
   RestaurantPage,
+  Review,
   SearchResults,
   ServiceAvailability,
   ServiceDetail,
@@ -99,6 +100,9 @@ export const getBooking = (code: string) =>
 
 export const cancelBooking = (code: string) =>
   api.post(`/bookings/${encodeURIComponent(code)}/cancel`).then((r) => r.data)
+
+export const submitReview = (code: string, rating: number, comment: string) =>
+  api.post<Review>(`/bookings/${encodeURIComponent(code)}/review`, { rating, comment: comment || null }).then((r) => r.data)
 
 export const lookupBookings = (phone: string) =>
   api.get<MyLookupResult>('/bookings/mine', { params: { phone } }).then((r) => r.data)

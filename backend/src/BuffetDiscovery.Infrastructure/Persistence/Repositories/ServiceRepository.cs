@@ -53,7 +53,21 @@ public class ServiceRepository(AppDbContext db) : IServiceRepository
             .ToListAsync(ct);
     }
 
+    public async Task<HashSet<int>> GetReviewedBookingIdsAsync(IEnumerable<int> bookingIds, CancellationToken ct)
+    {
+        var ids = bookingIds.ToList();
+        if (ids.Count == 0) return [];
+
+        var reviewed = await db.Reviews
+            .Where(r => r.BookingId != null && ids.Contains(r.BookingId.Value))
+            .Select(r => r.BookingId!.Value)
+            .ToListAsync(ct);
+        return reviewed.ToHashSet();
+    }
+
     public void Add(Service service) => db.Services.Add(service);
+
+    public void AddReview(Review review) => db.Reviews.Add(review);
 
     public void RemovePhotos(IEnumerable<ServicePhoto> photos) => db.ServicePhotos.RemoveRange(photos);
 

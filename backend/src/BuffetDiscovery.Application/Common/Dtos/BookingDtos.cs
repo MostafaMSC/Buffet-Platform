@@ -50,7 +50,8 @@ public record BookingDetailDto(
     string CurrencyCode,
     BookingStatus Status,
     int CancellationCutoffMinutes,
-    DateTime CreatedAt
+    DateTime CreatedAt,
+    bool HasReview
 );
 
 public record WaitlistDetailDto(

@@ -11,6 +11,7 @@ public record GetMyBookingsQuery(string Phone) : IRequest<MyLookupResultDto>;
 
 public class GetMyBookingsQueryHandler(
     IBookingRepository bookingRepo,
+    IServiceRepository serviceRepo,
     IWaitlistRepository waitlistRepo,
     IRestaurantSettingsRepository settingsRepo) : IRequestHandler<GetMyBookingsQuery, MyLookupResultDto>
 {
@@ -19,6 +20,7 @@ public class GetMyBookingsQueryHandler(
         var phone = request.Phone.Trim();
         var bookings = await bookingRepo.GetByPhoneAsync(phone, ct);
         var waitlistEntries = await waitlistRepo.GetByPhoneAsync(phone, ct);
+        var reviewedIds = await serviceRepo.GetReviewedBookingIdsAsync(bookings.Select(b => b.Id), ct);
 
         var settingsCache = new Dictionary<int, Domain.Entities.RestaurantSettings>();
         async Task<Domain.Entities.RestaurantSettings> SettingsFor(int restaurantId)
@@ -35,7 +37,7 @@ public class GetMyBookingsQueryHandler(
         foreach (var b in bookings)
         {
             var settings = await SettingsFor(b.Service!.RestaurantId);
-            bookingDtos.Add(BookingMapper.ToDetail(b, settings.CancellationCutoffMinutes));
+            bookingDtos.Add(BookingMapper.ToDetail(b, settings.CancellationCutoffMinutes, reviewedIds.Contains(b.Id)));
         }
 
         var waitlistDtos = new List<WaitlistDetailDto>();

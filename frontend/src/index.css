@@ -637,6 +637,9 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
 
 .rating-inline { display: inline-flex; align-items: center; gap: 3px; font-size: 0.86rem; font-weight: 600; color: var(--c-gold-dark); }
 
+.star-input { padding: 2px; border: 0; background: transparent; color: var(--c-gold-dark); cursor: pointer; line-height: 0; border-radius: 4px; }
+.star-input:focus-visible { outline: 2px solid var(--c-brand); outline-offset: 2px; }
+
 .fav-btn {
   width: 34px; height: 34px;
   display: grid; place-items: center;

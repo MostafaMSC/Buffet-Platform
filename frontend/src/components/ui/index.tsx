@@ -254,6 +254,32 @@ export function Stars({ rating, size = 14 }: { rating: number; size?: number }) 
   )
 }
 
+/// A clickable 1–5 star picker, with a hover preview so the guest sees what they're about
+/// to set before committing to it.
+export function StarRatingInput({ value, onChange, size = 26 }: { value: number; onChange: (rating: number) => void; size?: number }) {
+  const [hover, setHover] = useState(0)
+  const shown = hover || value
+  return (
+    <div className="row" style={{ gap: 4 }} onMouseLeave={() => setHover(0)}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          type="button"
+          className="star-input"
+          aria-label={String(n)}
+          aria-pressed={value >= n}
+          onMouseEnter={() => setHover(n)}
+          onClick={() => onChange(n)}
+        >
+          <svg width={size} height={size} viewBox="0 0 20 20" fill={shown >= n ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.5">
+            <path d="M10 2.5l2.35 4.76 5.25.76-3.8 3.7.9 5.23L10 14.48l-4.7 2.47.9-5.23-3.8-3.7 5.25-.76z" strokeLinejoin="round" />
+          </svg>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /// A rating only renders when it is backed by reviews — a restaurant with none shows
 /// nothing rather than a zero that reads as a bad score.
 export function RatingInline({ rating, reviewCount }: { rating: number | null; reviewCount: number }) {

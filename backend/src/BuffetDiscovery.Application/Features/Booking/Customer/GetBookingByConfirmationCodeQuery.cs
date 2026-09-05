@@ -13,6 +13,7 @@ public record GetBookingByConfirmationCodeQuery(string ConfirmationCode) : IRequ
 
 public class GetBookingByConfirmationCodeQueryHandler(
     IBookingRepository bookingRepo,
+    IServiceRepository serviceRepo,
     IRestaurantSettingsRepository settingsRepo)
     : IRequestHandler<GetBookingByConfirmationCodeQuery, BookingDetailDto>
 {
@@ -22,6 +23,7 @@ public class GetBookingByConfirmationCodeQueryHandler(
             ?? throw new NotFoundException("Booking not found.", "booking_not_found");
 
         var settings = await settingsRepo.GetOrCreateAsync(booking.Service!.RestaurantId, ct);
-        return BookingMapper.ToDetail(booking, settings.CancellationCutoffMinutes);
+        var reviewed = await serviceRepo.GetReviewedBookingIdsAsync([booking.Id], ct);
+        return BookingMapper.ToDetail(booking, settings.CancellationCutoffMinutes, reviewed.Contains(booking.Id));
     }
 }

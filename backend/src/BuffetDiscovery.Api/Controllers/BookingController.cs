@@ -51,6 +51,12 @@ public class BookingController(ISender mediator) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("{confirmationCode}/review")]
+    public async Task<ActionResult<ReviewDto>> CreateReview(string confirmationCode, CreateReviewBody body, CancellationToken ct)
+    {
+        return Ok(await mediator.Send(new CreateReviewCommand(confirmationCode, body.Rating, body.Comment), ct));
+    }
+
     [HttpGet("mine")]
     public async Task<ActionResult<MyLookupResultDto>> GetMine([FromQuery] string phone, CancellationToken ct)
     {
@@ -59,3 +65,4 @@ public class BookingController(ISender mediator) : ControllerBase
 }
 
 public record ConfirmWaitlistOfferBody(string CustomerPhone);
+public record CreateReviewBody(int Rating, string? Comment);

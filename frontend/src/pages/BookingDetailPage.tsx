@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { cancelBooking, getBooking } from '../api/endpoints'
-import { Badge, EmptyState, Icon, Skeleton } from '../components/ui'
+import { cancelBooking, getBooking, submitReview } from '../api/endpoints'
+import { Badge, EmptyState, Icon, Skeleton, StarRatingInput } from '../components/ui'
 import type { BookingDetail } from '../types'
 import { apiError, formatDateLong, formatTime, money } from '../utils/format'
 
@@ -30,6 +30,11 @@ export function BookingDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
+  const [reviewRating, setReviewRating] = useState(0)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewBusy, setReviewBusy] = useState(false)
+  const [reviewError, setReviewError] = useState<string | null>(null)
+
   const load = () => {
     setNotFound(false)
     getBooking(code!)
@@ -50,6 +55,19 @@ export function BookingDetailPage() {
       setError(apiError(err, t('common.error'), t))
     } finally {
       setBusy(false)
+    }
+  }
+
+  const submitBookingReview = async () => {
+    setReviewBusy(true)
+    setReviewError(null)
+    try {
+      await submitReview(code!, reviewRating, reviewComment.trim())
+      load()
+    } catch (err) {
+      setReviewError(apiError(err, t('common.error'), t))
+    } finally {
+      setReviewBusy(false)
     }
   }
 
@@ -148,6 +166,34 @@ export function BookingDetailPage() {
             <span className="nums">{money(booking.totalPrice, booking.currencyCode, i18n.language)}</span>
           </div>
         </div>
+
+        {booking.status === 'Completed' && (
+          <div className="card card-pad stack stack-3">
+            {booking.hasReview ? (
+              <p className="small soft">{t('booking.rateThanks')}</p>
+            ) : (
+              <>
+                <strong>{t('booking.rateTitle')}</strong>
+                <StarRatingInput value={reviewRating} onChange={setReviewRating} />
+                <textarea
+                  className="input"
+                  rows={3}
+                  placeholder={t('booking.rateCommentPlaceholder') ?? undefined}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                />
+                {reviewError && <div className="alert bad">{reviewError}</div>}
+                <button
+                  className="btn"
+                  disabled={reviewRating === 0 || reviewBusy}
+                  onClick={submitBookingReview}
+                >
+                  {reviewBusy ? t('booking.rateSubmitting') : t('booking.rateSubmit')}
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {error && <div className="alert bad">{error}</div>}
 

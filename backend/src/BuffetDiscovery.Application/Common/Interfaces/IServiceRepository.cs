@@ -22,7 +22,12 @@ public interface IServiceRepository
     /// Recent reviews for a service's restaurant, newest first.
     Task<List<Review>> GetReviewsAsync(int restaurantId, int? serviceId, int take, CancellationToken ct);
 
+    /// Which of the given booking ids already have a review — so "leave a review" only
+    /// ever shows once per booking.
+    Task<HashSet<int>> GetReviewedBookingIdsAsync(IEnumerable<int> bookingIds, CancellationToken ct);
+
     void Add(Service service);
+    void AddReview(Review review);
     void RemovePhotos(IEnumerable<ServicePhoto> photos);
     void RemoveMenuSections(IEnumerable<MenuSection> sections);
 }

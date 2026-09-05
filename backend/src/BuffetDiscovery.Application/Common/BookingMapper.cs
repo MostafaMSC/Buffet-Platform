@@ -9,7 +9,7 @@ namespace BuffetDiscovery.Application.Common;
 public static class BookingMapper
 {
     /// Requires the booking's Service → Restaurant → Area → City chain to be loaded.
-    public static BookingDetailDto ToDetail(Booking booking, int restaurantCancellationCutoffMinutes)
+    public static BookingDetailDto ToDetail(Booking booking, int restaurantCancellationCutoffMinutes, bool hasReview = false)
     {
         var service = booking.Service!;
         var restaurant = service.Restaurant!;
@@ -47,7 +47,8 @@ public static class BookingMapper
             city?.Country?.CurrencyCode ?? "IQD",
             booking.Status,
             CancellationCutoff(service, restaurantCancellationCutoffMinutes),
-            booking.CreatedAt);
+            booking.CreatedAt,
+            hasReview);
     }
 
     /// A service can set its own cancellation cutoff; otherwise the restaurant-wide setting

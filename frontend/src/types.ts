@@ -318,6 +318,7 @@ export interface BookingDetail {
   status: BookingStatus
   cancellationCutoffMinutes: number
   createdAt: string
+  hasReview: boolean
 }
 
 export interface WaitlistDetail {

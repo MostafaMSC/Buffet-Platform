@@ -36,6 +36,8 @@ const en = {
     booking_not_found: 'This booking could not be found.',
     cancel_not_allowed: 'This booking can no longer be cancelled.',
     cancel_cutoff: 'Cancellations must be made at least {{minutes}} minutes before the booking time.',
+    review_not_completed: 'You can review this booking once your visit is marked complete.',
+    review_already_submitted: "You've already reviewed this booking.",
   },
 
   nav: {
@@ -410,6 +412,11 @@ const en = {
     contactRestaurant: 'Contact restaurant',
     bookedOn: 'Booked {{date}}',
     guestsLine: '{{adults}} adults · {{children}} children',
+    rateTitle: 'Rate your visit',
+    rateCommentPlaceholder: 'What was it like? (optional)',
+    rateSubmit: 'Submit review',
+    rateSubmitting: 'Submitting…',
+    rateThanks: 'Thanks — your review is posted.',
   },
 
   bookingStatus: {
@@ -742,6 +749,8 @@ const ar: typeof en = {
     booking_not_found: 'تعذّر العثور على هذا الحجز.',
     cancel_not_allowed: 'لم يعد بالإمكان إلغاء هذا الحجز.',
     cancel_cutoff: 'يجب إلغاء الحجز قبل {{minutes}} دقيقة على الأقل من موعد الحجز.',
+    review_not_completed: 'يمكنك تقييم هذا الحجز بعد اكتمال زيارتك.',
+    review_already_submitted: 'لقد قمت بتقييم هذا الحجز مسبقاً.',
   },
 
   nav: {
@@ -1110,6 +1119,11 @@ const ar: typeof en = {
     contactRestaurant: 'تواصل مع المطعم',
     bookedOn: 'حُجز في {{date}}',
     guestsLine: '{{adults}} بالغين · {{children}} أطفال',
+    rateTitle: 'قيّم زيارتك',
+    rateCommentPlaceholder: 'كيف كانت التجربة؟ (اختياري)',
+    rateSubmit: 'إرسال التقييم',
+    rateSubmitting: 'جاري الإرسال…',
+    rateThanks: 'شكراً — تم نشر تقييمك.',
   },
 
   bookingStatus: {
