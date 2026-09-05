@@ -24,6 +24,8 @@ public record RestaurantProfileDto(
     string PhoneNumber,
     string? Address,
     string? GoogleMapsUrl,
+    double? Latitude,
+    double? Longitude,
     string? Description,
     string? DescriptionAr,
     string? LogoUrl,

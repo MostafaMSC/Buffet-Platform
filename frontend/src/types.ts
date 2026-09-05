@@ -594,6 +594,8 @@ export interface RestaurantProfile {
   phoneNumber: string
   address: string | null
   googleMapsUrl: string | null
+  latitude: number | null
+  longitude: number | null
   description: string | null
   descriptionAr: string | null
   logoUrl: string | null

@@ -1170,3 +1170,26 @@ table.data tr:last-child td { border-bottom: 0; }
 .status-dot.warn { background: var(--c-warn); }
 .status-dot.bad { background: var(--c-bad); }
 .status-dot.muted { background: var(--c-muted); }
+
+/* ---------------------------------------------------------------- map */
+
+.location-map {
+  width: 100%;
+  border: 1px solid var(--c-line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--c-surface-alt);
+}
+
+/* MapLibre ships its own control chrome; soften it to match the rest of the surfaces. */
+.location-map .maplibregl-ctrl-group {
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Attribution is a condition of using OpenFreeMap's tiles, so it stays legible rather than
+   being tucked away — only its weight is toned down. */
+.location-map .maplibregl-ctrl-attrib {
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.82);
+}

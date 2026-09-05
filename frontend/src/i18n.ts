@@ -478,6 +478,11 @@ const en = {
 
   dashboard: {
     editProfile: 'Restaurant profile',
+    mapPin: 'Pin your location',
+    mapPinHint: 'Tap the map where your restaurant is, or drag the pin. Guests use this to sort by distance.',
+    mapPinSet: 'Pinned at {{lat}}, {{lng}}',
+    mapPinNone: 'No pin yet — your restaurant will not appear in distance search.',
+    mapPinClear: 'Remove pin',
     title: 'Dashboard',
     overview: 'Overview',
     services: 'Services',
@@ -1178,6 +1183,11 @@ const ar: typeof en = {
 
   dashboard: {
     editProfile: 'ملف المطعم',
+    mapPin: 'حدد موقعك على الخريطة',
+    mapPinHint: 'انقر على الخريطة في موقع مطعمك أو اسحب العلامة. يستخدم الضيوف هذا للترتيب حسب المسافة.',
+    mapPinSet: 'تم التحديد عند {{lat}}، {{lng}}',
+    mapPinNone: 'لم يتم تحديد الموقع — لن يظهر مطعمك في البحث حسب المسافة.',
+    mapPinClear: 'إزالة العلامة',
     title: 'لوحة التحكم',
     overview: 'نظرة عامة',
     services: 'الخدمات',

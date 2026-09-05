@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
@@ -6,6 +6,10 @@ import { PhotoUploader } from '../../components/PhotoUploader'
 import { AreaSelect } from '../../components/AreaSelect'
 import { Skeleton } from '../../components/ui'
 import type { RestaurantProfile } from '../../types'
+
+// MapLibre is by far the heaviest thing this app loads, and only two screens want it — so it
+// stays out of the main bundle and arrives when a map is actually rendered.
+const LocationMap = lazy(() => import('../../components/LocationMap'))
 
 /// The venue behind the services: how it is named, where it is, and how a guest reaches it.
 export function ProfileEdit() {
@@ -40,6 +44,8 @@ export function ProfileEdit() {
         phoneNumber: form.phoneNumber,
         address: form.address,
         googleMapsUrl: form.googleMapsUrl,
+        latitude: form.latitude,
+        longitude: form.longitude,
         description: form.description,
         descriptionAr: form.descriptionAr,
         logoUrl: form.logoUrl,
@@ -104,6 +110,37 @@ export function ProfileEdit() {
             onChange={(e) => update('googleMapsUrl', e.target.value)}
           />
         </label>
+
+        <div className="field">
+          <span>{t('dashboard.mapPin')}</span>
+          <Suspense fallback={<Skeleton height={300} radius={12} />}>
+            <LocationMap
+              latitude={form.latitude}
+              longitude={form.longitude}
+              label={t('dashboard.mapPin')}
+              onPick={(lat, lng) =>
+                setForm((prev) => (prev ? { ...prev, latitude: lat, longitude: lng } : prev))
+              }
+            />
+          </Suspense>
+          <div className="row-between wrap" style={{ gap: 'var(--sp-2)', marginTop: 'var(--sp-2)' }}>
+            <span className="tiny muted">
+              {form.latitude != null && form.longitude != null
+                ? t('dashboard.mapPinSet', { lat: form.latitude.toFixed(5), lng: form.longitude.toFixed(5) })
+                : t('dashboard.mapPinNone')}
+            </span>
+            {form.latitude != null && (
+              <button
+                type="button"
+                className="btn ghost sm"
+                onClick={() => setForm((prev) => (prev ? { ...prev, latitude: null, longitude: null } : prev))}
+              >
+                {t('dashboard.mapPinClear')}
+              </button>
+            )}
+          </div>
+          <span className="hint">{t('dashboard.mapPinHint')}</span>
+        </div>
 
         <label className="field">
           <span>{t('profileForm.description')}</span>

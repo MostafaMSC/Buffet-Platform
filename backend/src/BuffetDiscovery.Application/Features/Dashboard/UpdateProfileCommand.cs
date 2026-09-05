@@ -12,6 +12,8 @@ public record UpdateProfileCommand(
     string PhoneNumber,
     string? Address,
     string? GoogleMapsUrl,
+    double? Latitude,
+    double? Longitude,
     string? Description,
     string? DescriptionAr,
     string? LogoUrl,
@@ -26,6 +28,15 @@ public class UpdateProfileCommandValidator : AbstractValidator<UpdateProfileComm
         RuleFor(x => x.NameAr).NotEmpty();
         RuleFor(x => x.AreaId).GreaterThan(0);
         RuleFor(x => x.PhoneNumber).NotEmpty();
+
+        // A pin is optional, but a half-set pair would silently drop the venue off distance
+        // search, and out-of-range values would place it somewhere impossible.
+        RuleFor(x => x.Latitude).InclusiveBetween(-90, 90).When(x => x.Latitude.HasValue);
+        RuleFor(x => x.Longitude).InclusiveBetween(-180, 180).When(x => x.Longitude.HasValue);
+        RuleFor(x => x.Longitude).NotNull().When(x => x.Latitude.HasValue)
+            .WithMessage("A map pin needs both a latitude and a longitude.");
+        RuleFor(x => x.Latitude).NotNull().When(x => x.Longitude.HasValue)
+            .WithMessage("A map pin needs both a latitude and a longitude.");
     }
 }
 
@@ -53,6 +64,8 @@ public class UpdateProfileCommandHandler(
         r.PhoneNumber = request.PhoneNumber;
         r.Address = request.Address;
         r.GoogleMapsUrl = request.GoogleMapsUrl;
+        r.Latitude = request.Latitude;
+        r.Longitude = request.Longitude;
         r.Description = request.Description;
         r.DescriptionAr = request.DescriptionAr;
         r.LogoUrl = request.LogoUrl;

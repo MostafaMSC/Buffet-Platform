@@ -18,6 +18,7 @@ public class GetOwnerProfileQueryHandler(
 
         return new RestaurantProfileDto(
             r.Id, r.Name, r.NameAr, r.AreaId, r.Area!.NameEn, r.PhoneNumber, r.Address, r.GoogleMapsUrl,
+            r.Latitude, r.Longitude,
             r.Description, r.DescriptionAr, r.LogoUrl, r.CoverPhotoUrl, r.Status
         );
     }

@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { getRestaurant } from '../api/endpoints'
 import { ServiceCard } from '../components/ServiceCard'
 import { EmptyState, RatingInline, Skeleton, Stars } from '../components/ui'
 import type { RestaurantPage } from '../types'
+
+// Kept out of the main bundle: a guest who never opens a restaurant page never pays for it.
+const LocationMap = lazy(() => import('../components/LocationMap'))
 
 /// A restaurant's own page: the venue, then everything it currently offers as normal
 /// bookable cards, so the route into a booking is the same as from search.
@@ -62,6 +65,21 @@ export function RestaurantDetail() {
             </div>
           )}
         </div>
+
+        {r.latitude != null && r.longitude != null && (
+          <section className="stack stack-3">
+            <div className="section-head"><h2>{t('detail.location')}</h2></div>
+            {r.address && <p className="soft">{r.address}</p>}
+            <Suspense fallback={<Skeleton height={280} radius={12} />}>
+              <LocationMap
+                latitude={r.latitude}
+                longitude={r.longitude}
+                height={280}
+                label={`${name} — ${t('detail.location')}`}
+              />
+            </Suspense>
+          </section>
+        )}
 
         <section>
           <div className="section-head"><h2>{t('search.resultsTitle')}</h2></div>
