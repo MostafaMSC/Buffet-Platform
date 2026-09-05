@@ -490,9 +490,11 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.88);
+  /* Tan/caramel wall tone sampled from the logo artwork's backdrop, so the badge
+     sits on the header without a visible edge around it. */
+  background: rgba(171, 147, 118, 0.92);
   backdrop-filter: saturate(180%) blur(12px);
-  border-bottom: 1px solid var(--c-line);
+  border-bottom: 1px solid rgba(51, 47, 41, 0.18);
 }
 
 .site-header > .container {
@@ -522,19 +524,21 @@ input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inher
   border-radius: var(--r-pill);
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--c-ink-soft);
+  /* Darker than --c-ink-soft: that tone doesn't clear AA contrast against the header's
+     tan background, only against the app's near-white surfaces. */
+  color: #332f29;
   background: transparent;
   border: 0;
   transition: background var(--t-fast), color var(--t-fast);
 }
-.nav-link:hover { background: var(--c-surface-alt); color: var(--c-ink); }
+.nav-link:hover { background: rgba(255, 255, 255, 0.55); color: var(--c-ink); }
 .nav-link.active { color: var(--c-ink); }
 
 .nav-link.outlined {
-  border: 1px solid var(--c-line-strong);
+  border: 1px solid rgba(51, 47, 41, 0.35);
   padding-inline: var(--sp-4);
 }
-.nav-link.outlined:hover { border-color: var(--c-ink-soft); }
+.nav-link.outlined:hover { border-color: var(--c-ink); }
 
 @media (max-width: 860px) {
   .nav .desktop-only { display: none; }
