@@ -9,6 +9,7 @@ const en = {
   /// language the guest is browsing in. apiError() looks a code up here first and falls
   /// back to the server's English message if a code is missing or unrecognized.
   errors: {
+    validation_failed: 'Please check the details you entered and try again.',
     service_not_found: 'This service could not be found.',
     booking_min_guests: 'This service takes bookings for {{min}} guests or more.',
     booking_max_guests: 'This service takes bookings for up to {{max}} guests.',
@@ -525,6 +526,10 @@ const en = {
     schedule: 'Schedule & capacity',
     rules: 'Booking rules',
     photos: 'Photos & video',
+    uploading: 'Uploading…',
+    removeVideo: 'Remove video',
+    videoUploadError: 'That file could not be uploaded. Check the format and size, then try again.',
+    photoUploadError: 'That photo could not be uploaded. Check the format and size, then try again.',
     name: 'Service name (English)',
     nameAr: 'Service name (Arabic)',
     description: 'Description (English)',
@@ -720,6 +725,7 @@ const ar: typeof en = {
   appName: 'مفتوح',
 
   errors: {
+    validation_failed: 'يرجى مراجعة البيانات التي أدخلتها والمحاولة مرة أخرى.',
     service_not_found: 'تعذّر العثور على هذه الخدمة.',
     booking_min_guests: 'هذه الخدمة تقبل الحجوزات بدءاً من {{min}} ضيوف.',
     booking_max_guests: 'هذه الخدمة تقبل الحجوزات لغاية {{max}} ضيف.',
@@ -1230,6 +1236,10 @@ const ar: typeof en = {
     schedule: 'الجدول والسعة',
     rules: 'قواعد الحجز',
     photos: 'الصور والفيديو',
+    uploading: 'جارٍ الرفع…',
+    removeVideo: 'إزالة الفيديو',
+    videoUploadError: 'تعذر رفع هذا الملف. تحقق من الصيغة والحجم ثم حاول مرة أخرى.',
+    photoUploadError: 'تعذرت إضافة هذه الصورة. تحقق من الصيغة والحجم ثم حاول مرة أخرى.',
     name: 'اسم الخدمة (إنكليزي)',
     nameAr: 'اسم الخدمة (عربي)',
     description: 'الوصف (إنكليزي)',

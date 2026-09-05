@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
+import { apiError } from '../utils/format'
 
 interface Props {
   url: string | null
@@ -24,10 +25,9 @@ export function VideoUploader({ url, onChange }: Props) {
       })
       onChange(res.data.url)
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        t('offeringForm.videoUploadError')
-      setError(message)
+      // Via apiError so the upload validator's own reason ("Unsupported file type…") reaches
+      // the owner, instead of the generic wrapper the server sends alongside it.
+      setError(apiError(err, t('services.videoUploadError'), t))
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -41,7 +41,7 @@ export function VideoUploader({ url, onChange }: Props) {
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video src={url} controls muted />
           <button type="button" className="btn small secondary" onClick={() => onChange(null)}>
-            {t('offeringForm.removeVideo')}
+            {t('services.removeVideo')}
           </button>
         </div>
       </div>
@@ -59,7 +59,7 @@ export function VideoUploader({ url, onChange }: Props) {
           if (file) handleFile(file)
         }}
       />
-      {uploading && <span style={{ marginInlineStart: '0.5rem' }}>{t('offeringForm.uploading')}</span>}
+      {uploading && <span style={{ marginInlineStart: '0.5rem' }}>{t('services.uploading')}</span>}
       {error && <div className="alert bad" style={{ marginTop: 'var(--sp-3)' }}>{error}</div>}
     </div>
   )

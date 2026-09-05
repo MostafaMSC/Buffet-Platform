@@ -26,7 +26,9 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
         var (statusCode, body) = ex switch
         {
             ApplicationExceptions.ValidationException validationEx =>
-                (HttpStatusCode.BadRequest, (object)new { message = "Validation failed.", errors = validationEx.Errors }),
+                // The code lets the client show this in the guest's language; `errors` still
+                // carries the per-field detail, which is what the client prefers to show.
+                (HttpStatusCode.BadRequest, (object)new { message = "Validation failed.", code = "validation_failed", errors = validationEx.Errors }),
             ApplicationExceptions.NotFoundException notFoundEx =>
                 (HttpStatusCode.NotFound, (object)new { message = notFoundEx.Message, code = notFoundEx.Code, @params = notFoundEx.Params }),
             ApplicationExceptions.ConflictException conflictEx =>

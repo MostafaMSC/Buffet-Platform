@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../api/client'
+import { apiError } from '../utils/format'
 
 interface Props {
   urls: string[]
@@ -12,9 +13,11 @@ export function PhotoUploader({ urls, onChange, maxPhotos = 6 }: Props) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleFile = async (file: File) => {
     setUploading(true)
+    setError(null)
     try {
       const formData = new FormData()
       formData.append('file', file)
@@ -22,6 +25,10 @@ export function PhotoUploader({ urls, onChange, maxPhotos = 6 }: Props) {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       onChange([...urls, res.data.url])
+    } catch (err: unknown) {
+      // A rejected upload used to reject silently: the file simply never appeared and the
+      // owner was left guessing whether it was too large, the wrong format, or still going.
+      setError(apiError(err, t('services.photoUploadError'), t))
     } finally {
       setUploading(false)
       if (inputRef.current) inputRef.current.value = ''
@@ -55,9 +62,10 @@ export function PhotoUploader({ urls, onChange, maxPhotos = 6 }: Props) {
               if (file) handleFile(file)
             }}
           />
-          {uploading && <span style={{ marginInlineStart: '0.5rem' }}>{t('offeringForm.uploading')}</span>}
+          {uploading && <span style={{ marginInlineStart: '0.5rem' }}>{t('services.uploading')}</span>}
         </div>
       )}
+      {error && <div className="alert bad" style={{ marginTop: 'var(--sp-3)' }}>{error}</div>}
     </div>
   )
 }

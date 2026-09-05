@@ -82,12 +82,17 @@ export function apiError(
     response?: { data?: { message?: string; code?: string; params?: Record<string, unknown>; errors?: Record<string, string[]> } }
   })?.response?.data
 
+  // Field-level failures first. A validation response always carries the generic
+  // "Validation failed." alongside them, so reading `message` before `errors` would throw
+  // away the only part that tells the guest what to actually change.
+  const fieldErrors = Object.values(body?.errors ?? {}).flat().filter(Boolean)
+  if (fieldErrors.length > 0) return fieldErrors.join(' · ')
+
   if (body?.code) {
     const translated = t(`errors.${body.code}`, { ...body.params, defaultValue: '' })
     if (translated) return translated
   }
 
   if (body?.message) return body.message
-  const firstValidation = body?.errors && Object.values(body.errors)[0]?.[0]
-  return firstValidation ?? fallback
+  return fallback
 }
