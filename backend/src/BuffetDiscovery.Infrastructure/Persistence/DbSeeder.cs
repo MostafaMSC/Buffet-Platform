@@ -19,9 +19,11 @@ public static class DbSeeder
     private const int PlaceholderPhotoCount = 5;
 
     /// Seed data ships with no real restaurant photography, so every card/gallery slot
-    /// gets one of a handful of locally-served placeholder images instead of an
-    /// externally-hosted one — the app then has zero photos that break on a network with
-    /// no outbound internet access (a common case for local dev behind a firewall).
+    /// gets one of a handful of placeholder images from the frontend's own public/
+    /// folder (frontend/public/seed-photos) instead of an externally-hosted one — the
+    /// app then has zero photos that break on a network with no outbound internet
+    /// access (a common case for local dev behind a firewall), and none of them depend
+    /// on the API being up either.
     private static string Photo(string seed, int w = 900, int h = 600)
     {
         _ = w; _ = h; // kept so call sites reading "intended size" don't need to change
