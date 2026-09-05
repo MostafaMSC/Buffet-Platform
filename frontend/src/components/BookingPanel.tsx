@@ -108,8 +108,9 @@ export function BookingPanel({
       setOpen(false)
       navigate(`/bookings/${booking.confirmationCode}?new=1`)
     } catch (err) {
+      // Stay on review: 'when' is the panel behind the sheet, not a sheet step, so sending
+      // the guest there left them staring at an empty sheet with the reason hidden under it.
       setError(apiError(err, t('common.error'), t))
-      setStep('when')
     } finally {
       setSubmitting(false)
     }

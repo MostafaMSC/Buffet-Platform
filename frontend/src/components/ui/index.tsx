@@ -318,9 +318,16 @@ export function Sheet({
   footer?: ReactNode
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  // Every call site passes an inline arrow for onClose, so the prop is a new function on
+  // each render — including the render behind every keystroke in a field inside the sheet.
+  // Reading it through a ref keeps the setup below a mount-only effect; depending on the
+  // prop directly re-ran it per keystroke, and the focus() it takes on open then pulled the
+  // caret out of the field being typed into after a single character.
+  const closeRef = useRef(onClose)
+  useEffect(() => { closeRef.current = onClose })
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeRef.current() }
     document.addEventListener('keydown', onKey)
     const previous = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -329,7 +336,7 @@ export function Sheet({
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = previous
     }
-  }, [onClose])
+  }, [])
 
   return (
     <div className="sheet-backdrop" onClick={onClose} role="presentation">
