@@ -69,6 +69,8 @@ public static class DbSeeder
         ["Basra Corniche Kitchen"] = "gettyimages-1441053227-612x612.jpg",
         ["Zayouna Family Restaurant"] = "gettyimages-2254400591-612x612.jpg",
         ["Harthiya Morning Table"] = "gettyimages-2231131197-612x612.jpg",
+        ["Najaf Pilgrim's Table"] = "gettyimages-123063989-612x612.jpg",
+        ["Karbala Hospitality House"] = "gettyimages-80027136-612x612.jpg",
     };
 
     private static readonly Dictionary<string, string> CityImagesBySlug = new()
@@ -76,6 +78,9 @@ public static class DbSeeder
         ["baghdad"] = "gettyimages-91509530-612x612.jpg",
         ["erbil"] = "gettyimages-123063989-612x612.jpg",
         ["basra"] = "gettyimages-2157940277-612x612.jpg",
+        ["najaf"] = "gettyimages-155033848-612x612.jpg",
+        ["karbala"] = "catering-buffet.jpg",
+        ["mosul"] = "gettyimages-175506580-612x612.jpg",
     };
 
     // ---------------------------------------------------------------- locations
