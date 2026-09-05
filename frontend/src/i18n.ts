@@ -717,7 +717,8 @@ const en = {
 
   map: {
     title: 'Map view',
-    comingSoon: 'Map view is ready for a provider to be plugged in. Until then, here is where each result sits.',
+    noPins: 'None of these results has a location pinned yet.',
+    unavailable: 'The map could not be loaded. Check your connection — the location is still saved.',
   },
 }
 
@@ -1423,7 +1424,8 @@ const ar: typeof en = {
 
   map: {
     title: 'عرض الخريطة',
-    comingSoon: 'عرض الخريطة جاهز لربط مزود خرائط. حتى ذلك الحين، هذه مواقع النتائج.',
+    noPins: 'لا يوجد موقع محدد لأي من هذه النتائج بعد.',
+    unavailable: 'تعذر تحميل الخريطة. تحقق من الاتصال — الموقع محفوظ على أي حال.',
   },
 }
 

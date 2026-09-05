@@ -521,9 +521,10 @@ html[dir='rtl'] .site-header {
   display: inline-flex; align-items: center; gap: var(--sp-2);
   min-width: 0;
 }
-/* The mark is a square badge now that its backdrop is cut away, so it needs more
-   height than the old wide crop did to carry the same presence in the bar. */
-.brand-logo { height: 74px; width: auto; display: block; }
+/* The square mark carries its presence through contrast against the bar rather than sheer
+   size: at 74px it stood 88% as tall as the 84px header and read as an oversized sticker,
+   with no air above or below it. Just over half the bar leaves it room to sit in. */
+.brand-logo { height: 54px; width: auto; display: block; }
 
 .nav { display: flex; align-items: center; gap: var(--sp-1); flex-shrink: 0; }
 
@@ -560,9 +561,8 @@ html[dir='rtl'] .site-header {
    a signed-in owner has two extra entries and the row must still fit. */
 @media (max-width: 560px) {
   .site-header > .container { gap: var(--sp-2); }
-  /* The square mark costs far less width than the old wide crop, so it gives up
-     less height here than it used to. */
-  .brand-logo { height: 58px; }
+  /* Narrower bar, and the nav still has to fit beside it. */
+  .brand-logo { height: 44px; }
   .nav { gap: 0; }
   .nav-link { padding-inline: var(--sp-2); }
   .nav-link.outlined { padding-inline: var(--sp-3); }
@@ -1134,8 +1134,8 @@ table.data tr:last-child td { border-bottom: 0; }
   background: var(--c-surface-alt);
   border-inline-start: 1px solid var(--c-line);
   display: grid;
-  place-items: center;
-  padding: var(--sp-5);
+  place-items: stretch;
+  overflow: hidden;
 }
 
 .map-placeholder { text-align: center; max-width: 34ch; color: var(--c-muted); font-size: 0.88rem; }
@@ -1173,6 +1173,25 @@ table.data tr:last-child td { border-bottom: 0; }
 
 /* ---------------------------------------------------------------- map */
 
+.location-map-wrap { position: relative; }
+.location-map-wrap > .location-map { height: 100%; }
+
+/* Shown over the map only when the tiles never arrive, so a network problem reads as a
+   network problem instead of a broken page. */
+.location-map-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--sp-5);
+  border-radius: var(--r-md);
+  background: var(--c-surface-alt);
+  color: var(--c-ink-soft);
+  font-size: 0.85rem;
+}
+
 .location-map {
   width: 100%;
   border: 1px solid var(--c-line);
@@ -1193,3 +1212,35 @@ table.data tr:last-child td { border-bottom: 0; }
   font-size: 0.68rem;
   background: rgba(255, 255, 255, 0.82);
 }
+
+/* A result pin. Its own element rather than the default marker so hovering a card can light
+   the matching pin up without rebuilding it. */
+.map-marker {
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* The dot, not the marker: MapLibre owns the marker element's transform for positioning. */
+.map-marker-dot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--c-brand);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform var(--t-fast), background var(--t-fast);
+}
+
+.map-marker:hover .map-marker-dot,
+.map-marker.active .map-marker-dot {
+  background: var(--c-brand-dark);
+  transform: scale(1.55);
+}
+
+/* Inside the results pane the map is the pane, so it must not also carry a card border. */
+.map-pane .location-map { border: 0; border-radius: 0; }

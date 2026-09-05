@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { getLocations, searchServices, type SearchParams } from '../api/endpoints'
@@ -6,6 +6,8 @@ import { CategoryNav, type CategoryValue } from '../components/CategoryNav'
 import { FilterPanel, activeFilterCount } from '../components/FilterPanel'
 import { SearchBar, SearchSummary, type SearchBarValue } from '../components/SearchBar'
 import { ServiceCard } from '../components/ServiceCard'
+
+const LocationMap = lazy(() => import('../components/LocationMap'))
 import { CardSkeleton, EmptyState, Icon, Select, Sheet } from '../components/ui'
 import type { CountryOption, SearchResults, SearchSort } from '../types'
 import { addDays, formatDate, todayInBaghdad } from '../utils/format'
@@ -25,6 +27,20 @@ export function Search() {
   const [showMap, setShowMap] = useState(false)
   const [showSearchSheet, setShowSearchSheet] = useState(false)
   const [highlighted, setHighlighted] = useState<number | null>(null)
+
+  // Only results the restaurant has actually pinned can be plotted; the rest stay list-only.
+  const mapPoints = useMemo(
+    () =>
+      (results?.items ?? [])
+        .filter((c) => c.latitude != null && c.longitude != null)
+        .map((c) => ({
+          id: c.serviceId,
+          latitude: c.latitude as number,
+          longitude: c.longitude as number,
+          label: i18n.language === 'ar' ? c.restaurantNameAr : c.restaurantName,
+        })),
+    [results, i18n.language],
+  )
   const requestId = useRef(0)
   const [countries, setCountries] = useState<CountryOption[]>([])
 
@@ -244,18 +260,22 @@ export function Search() {
 
         {showMap && results && (
           <aside className="map-pane" aria-label={t('map.title')}>
-            <div className="map-placeholder">
-              <Icon name="map" size={28} />
-              <p style={{ marginTop: 'var(--sp-2)' }}>{t('map.comingSoon')}</p>
-              <div className="map-pin-list">
-                {results.items.filter((c) => c.latitude && c.longitude).map((card) => (
-                  <div key={card.serviceId} className={`map-pin ${highlighted === card.serviceId ? 'active' : ''}`}>
-                    <span className="truncate">{i18n.language === 'ar' ? card.restaurantNameAr : card.restaurantName}</span>
-                    <span className="nums muted">{card.latitude?.toFixed(3)}, {card.longitude?.toFixed(3)}</span>
-                  </div>
-                ))}
+            {mapPoints.length === 0 ? (
+              <div className="map-placeholder">
+                <Icon name="map" size={28} />
+                <p style={{ marginTop: 'var(--sp-2)' }}>{t('map.noPins')}</p>
               </div>
-            </div>
+            ) : (
+              <Suspense fallback={<div className="map-placeholder"><Icon name="map" size={28} /></div>}>
+                <LocationMap
+                  points={mapPoints}
+                  highlightedId={highlighted}
+                  onSelect={setHighlighted}
+                  height="100%"
+                  label={t('map.title')}
+                />
+              </Suspense>
+            )}
           </aside>
         )}
       </div>
