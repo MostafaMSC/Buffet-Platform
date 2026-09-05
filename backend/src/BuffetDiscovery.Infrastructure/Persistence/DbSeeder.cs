@@ -16,19 +16,45 @@ public static class DbSeeder
         await SeedBookingSampleDataAsync(db);
     }
 
-    private const int PlaceholderPhotoCount = 5;
+    /// Stock food/buffet photography, served straight from the frontend's own public/
+    /// folder — no external host, so nothing here depends on outbound internet access or
+    /// the API being up. Picked deterministically per seed string so the same
+    /// restaurant/service always gets the same photo across reseeds.
+    ///
+    /// Only the clean (unwatermarked) files from the batch are listed — the "-2048x2048"
+    /// sized ones in that drop all carry a visible "gettyimages / Credit: ..." watermark
+    /// (unlicensed comp downloads), so they're excluded rather than shipped in the app.
+    private static readonly string[] PhotoPool =
+    [
+        "catering-buffet.jpg",
+        "gettyimages-123063989-612x612.jpg",
+        "gettyimages-1438809400-612x612.jpg",
+        "gettyimages-1441053227-612x612.jpg",
+        "gettyimages-1441333698-612x612.jpg",
+        "gettyimages-1441334460-612x612.jpg",
+        "gettyimages-1492861210-612x612.jpg",
+        "gettyimages-155033848-612x612.jpg",
+        "gettyimages-175506580-612x612.jpg",
+        "gettyimages-2157940277-612x612.jpg",
+        "gettyimages-2163411570-612x612.jpg",
+        "gettyimages-2202434182-612x612.jpg",
+        "gettyimages-2231131197-612x612.jpg",
+        "gettyimages-2244146867-612x612.jpg",
+        "gettyimages-2254400591-612x612.jpg",
+        "gettyimages-531306158-612x612.jpg",
+        "gettyimages-657021234-612x612.jpg",
+        "gettyimages-755656679-612x612.jpg",
+        "gettyimages-80027136-612x612.jpg",
+        "gettyimages-91509530-612x612.jpg",
+        "luxury-plate-meal-vintage-celebration.jpg",
+        "open-food-containers.jpg",
+    ];
 
-    /// Seed data ships with no real restaurant photography, so every card/gallery slot
-    /// gets one of a handful of placeholder images from the frontend's own public/
-    /// folder (frontend/public/seed-photos) instead of an externally-hosted one — the
-    /// app then has zero photos that break on a network with no outbound internet
-    /// access (a common case for local dev behind a firewall), and none of them depend
-    /// on the API being up either.
     private static string Photo(string seed, int w = 900, int h = 600)
     {
         _ = w; _ = h; // kept so call sites reading "intended size" don't need to change
-        var index = (Math.Abs(seed.GetHashCode()) % PlaceholderPhotoCount) + 1;
-        return $"/seed-photos/placeholder-{index}.svg";
+        var index = Math.Abs(seed.GetHashCode()) % PhotoPool.Length;
+        return $"/{PhotoPool[index]}";
     }
 
     // ---------------------------------------------------------------- locations
