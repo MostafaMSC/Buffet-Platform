@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Mixed seafood platter with shrimp, fish and rice">
+  <title>Seafood Platter</title>
+  <defs>
+    <linearGradient id="bg7" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3f6f7"/>
+      <stop offset="1" stop-color="#b7e3e6"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg7)"/>
+
+  <ellipse cx="450" cy="350" rx="330" ry="140" fill="#ffffff" stroke="#bcdde0" stroke-width="8"/>
+  <ellipse cx="450" cy="345" rx="290" ry="112" fill="#fbfdfd"/>
+
+  <!-- rice base -->
+  <ellipse cx="380" cy="380" rx="150" ry="60" fill="#f6efd8"/>
+
+  <!-- fish piece -->
+  <path d="M 480 300 Q 560 270 620 300 Q 560 330 480 300 Z" fill="#d99a5c"/>
+  <path d="M 620 300 L 660 285 L 650 300 L 660 315 Z" fill="#c1823f"/>
+
+  <!-- shrimp curls -->
+  <g fill="#e8735a">
+    <path d="M 250 300 q 30 -40 60 0 q -10 25 -30 25 q -25 0 -30 -25 Z"/>
+    <path d="M 310 340 q 30 -40 60 0 q -10 25 -30 25 q -25 0 -30 -25 Z"/>
+    <path d="M 220 360 q 30 -40 60 0 q -10 25 -30 25 q -25 0 -30 -25 Z"/>
+  </g>
+  <g stroke="#c14a34" stroke-width="3" fill="none" opacity="0.6">
+    <path d="M 260 296 q 20 10 40 -4"/>
+    <path d="M 320 336 q 20 10 40 -4"/>
+    <path d="M 230 356 q 20 10 40 -4"/>
+  </g>
+
+  <!-- lemon + herb garnish -->
+  <g transform="translate(600,420)">
+    <circle r="26" fill="#f4e04d" stroke="#d8c22f" stroke-width="3"/>
+    <g stroke="#fff8d6" stroke-width="2">
+      <line x1="0" y1="0" x2="-18" y2="-14"/>
+      <line x1="0" y1="0" x2="0" y2="-22"/>
+      <line x1="0" y1="0" x2="18" y2="-14"/>
+    </g>
+  </g>
+  <g fill="#4f7a3a">
+    <ellipse cx="330" cy="440" rx="8" ry="16" transform="rotate(20 330 440)"/>
+    <ellipse cx="350" cy="448" rx="8" ry="16" transform="rotate(-10 350 448)"/>
+  </g>
+</svg>

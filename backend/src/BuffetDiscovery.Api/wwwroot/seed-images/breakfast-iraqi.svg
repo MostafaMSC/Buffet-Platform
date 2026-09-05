@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Iraqi breakfast with geymar clotted cream, honey, samoon bread and tea">
+  <title>Iraqi Breakfast</title>
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdf1e0"/>
+      <stop offset="1" stop-color="#f3d9ab"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg3)"/>
+
+  <!-- geymar plate -->
+  <circle cx="300" cy="330" r="160" fill="#ffffff" stroke="#e8cf9e" stroke-width="6"/>
+  <ellipse cx="300" cy="320" rx="120" ry="70" fill="#fbf6ea"/>
+  <ellipse cx="300" cy="310" rx="95" ry="50" fill="#fffdf6"/>
+  <path d="M 220 300 q 80 -40 160 0 q -80 30 -160 0 Z" fill="#f4c542" opacity="0.85"/>
+  <path d="M 240 320 q 60 15 120 0" stroke="#e2a91d" stroke-width="4" fill="none"/>
+
+  <!-- samoon bread -->
+  <g transform="translate(560,260)">
+    <ellipse rx="90" ry="45" fill="#dba15a"/>
+    <ellipse cx="0" cy="-8" rx="80" ry="34" fill="#eab876"/>
+    <path d="M -50 -8 q 50 -25 100 0" stroke="#b9803c" stroke-width="4" fill="none"/>
+  </g>
+
+  <!-- tea glass -->
+  <g transform="translate(650,420)">
+    <path d="M -30 -50 L 30 -50 L 22 55 L -22 55 Z" fill="#c9432a" opacity="0.85"/>
+    <path d="M -30 -50 L 30 -50 L 28 -20 L -28 -20 Z" fill="#e8e0d0" opacity="0.6"/>
+  </g>
+
+  <!-- fried kahi -->
+  <g transform="translate(200,470)">
+    <rect x="-60" y="-15" width="120" height="30" rx="8" fill="#e8b866"/>
+    <rect x="-55" y="-10" width="110" height="8" fill="#f4c542"/>
+  </g>
+</svg>

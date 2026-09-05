@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Simple roasted chicken and rice plate with salad">
+  <title>Chicken &amp; Rice</title>
+  <defs>
+    <linearGradient id="bg14" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff8e6"/>
+      <stop offset="1" stop-color="#f2dda0"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#bg14)"/>
+
+  <circle cx="450" cy="340" r="190" fill="#ffffff" stroke="#e8d19c" stroke-width="8"/>
+  <circle cx="450" cy="330" r="155" fill="#fbf6ea"/>
+
+  <!-- rice -->
+  <ellipse cx="400" cy="360" rx="120" ry="70" fill="#f8f2df"/>
+  <g fill="#efe6c8">
+    <circle cx="360" cy="340" r="6"/><circle cx="400" cy="330" r="6"/><circle cx="440" cy="345" r="6"/>
+    <circle cx="380" cy="380" r="6"/><circle cx="420" cy="390" r="6"/>
+  </g>
+
+  <!-- chicken piece -->
+  <g transform="translate(500,290)">
+    <path d="M -60 20 Q -70 -30 -10 -45 Q 50 -55 65 0 Q 75 35 30 45 Q -20 55 -60 20 Z" fill="#d99a3c"/>
+    <path d="M -40 5 Q -10 -25 40 -20" stroke="#b97a24" stroke-width="4" fill="none" opacity="0.6"/>
+  </g>
+
+  <!-- salad garnish -->
+  <g fill="#7ea34a">
+    <ellipse cx="300" cy="420" rx="18" ry="12"/>
+    <ellipse cx="330" cy="440" rx="18" ry="12"/>
+  </g>
+  <circle cx="315" cy="425" r="10" fill="#e8735a"/>
+</svg>
